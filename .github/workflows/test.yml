@@ -1,0 +1,30 @@
+name: Run Tests
+
+# どのタイミングでこの自動テストを動かすかの設定
+on:
+  pull_request:
+    branches: ['develop', 'main'] # developかmain宛のPRが作られた時、または更新された時
+
+jobs:
+  test:
+    # 借りるパソコンOSの種類（最新のUbuntu環境）
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. GitHub上のコードをこの空のパソコンに持ってくる
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Node.js（JavaScript実行環境）をセットアップする
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # よく使われる安定バージョン
+
+      # 3. 必要なパッケージをインストールする
+      - name: Install dependencies
+        run: npm install
+
+      # 4. テストを実行する！
+      - name: Run tests
+        run: npm run test
