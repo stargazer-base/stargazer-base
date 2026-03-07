@@ -14,8 +14,10 @@ export default function MovieLogPage() {
 
       <div className="mt-12 flex w-full max-w-5xl flex-col items-center justify-center">
         <div className="grid w-full grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {/* トップページまたは一覧に表示される動画カード */}
-          <MovieCard />
+          {/* トップページまたは一覧に表示される動画カード（ダミー10件） */}
+          {[...Array(10)].map((_, index) => (
+            <MovieCard key={index} />
+          ))}
         </div>
       </div>
     </main>
