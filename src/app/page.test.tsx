@@ -69,7 +69,7 @@ describe('メイン画面', () => {
     render(<Home />);
 
     // テキストを取得
-    const introText = screen.getByText('YouTube動画の視聴ログ管理アプリ');
+    const introText = screen.getByText('YouTube動画視聴ログ管理アプリ');
     expect(introText).toBeInTheDocument();
 
     // リスト項目を取得

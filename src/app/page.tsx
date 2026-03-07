@@ -39,7 +39,7 @@ export default function Home() {
                 推し色に染まる
               </h2>
               <p className="mt-1 text-sm text-indigo-200/80">
-                YouTube動画の視聴ログ管理アプリ
+                YouTube動画視聴ログ管理アプリ
               </p>
               <ul className="mt-5 space-y-2 text-sm text-slate-300">
                 <li className="flex items-start">
