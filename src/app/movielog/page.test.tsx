@@ -32,7 +32,8 @@ describe('MovieLog：推し色に染まる', () => {
     render(<MovieLogPage />);
 
     // MovieCardコンポーネントの中に存在するはずの要素（例としてダミータグ）で描画を確認
-    const tag = screen.getByText('#初配信');
-    expect(tag).toBeInTheDocument();
+    // 複数件(10件)描画されるため `getAllByText` を使用
+    const tags = screen.getAllByText('#初配信');
+    expect(tags.length).toBeGreaterThan(0);
   });
 });
