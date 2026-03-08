@@ -1,3 +1,4 @@
+import GoogleLoginButton from '@/components/ui/GoogleLoginButton';
 import GuestLoginButton from '@/components/ui/GuestLoginButton';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -70,6 +71,7 @@ export default function Home() {
           </li>
         </ul>
         <div className="mt-12">
+          <GoogleLoginButton />
           <GuestLoginButton />
         </div>
       </div>
