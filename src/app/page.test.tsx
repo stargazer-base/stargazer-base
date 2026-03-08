@@ -1,6 +1,27 @@
 import { render, screen } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import Home from './page';
+
+// メイン画面がレンダリングされる前に、next/navigationをモック化します
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: vi.fn(),
+    refresh: vi.fn(),
+  }),
+}));
+
+// 2. 【追加】Supabaseのクライアントをモック化
+vi.mock('@/lib/supabase/client', () => ({
+  createClient: () => ({
+    auth: {
+      // signInAnonymouslyが呼ばれたら、成功したフリ（ダミーのユーザーデータ）を返すように設定
+      signInAnonymously: vi.fn().mockResolvedValue({
+        data: { user: { id: 'dummy-uuid-1234' } },
+        error: null,
+      }),
+    },
+  }),
+}));
 
 describe('メイン画面', () => {
   it('タイトルの見出しがh1（見出しレベル1）で正しく表示されること', () => {
