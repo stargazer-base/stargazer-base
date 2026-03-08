@@ -1,4 +1,3 @@
-// components/GuestLoginButton.tsx
 'use client';
 
 import { useState } from 'react';
