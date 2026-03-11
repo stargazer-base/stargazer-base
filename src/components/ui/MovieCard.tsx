@@ -4,7 +4,12 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
 
-export default function MovieCard() {
+type VideoProps = {
+  id: string;
+  thumbnail_url: string | null;
+};
+
+export default function MovieCard({ video }: { video?: VideoProps }) {
   const [isWatched, setIsWatched] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
 
@@ -39,7 +44,7 @@ export default function MovieCard() {
         {/* サムネイル画像エリア */}
         <div className="relative mb-3 aspect-video w-full overflow-hidden rounded-xl border border-white/10 bg-black/50 shadow-inner">
           <Image
-            src="/placeholder.svg"
+            src={video?.thumbnail_url || '/placeholder.svg'}
             alt="動画サムネイルのプレースホルダー"
             width={640}
             height={360}
