@@ -23,7 +23,10 @@ export default async function MovieLogPage() {
       <div className="mt-12 flex w-full max-w-5xl flex-col items-center justify-center">
         <div className="grid w-full grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {videos?.map((video) => (
-            <MovieCard key={video.id} video={video as any} />
+            <MovieCard
+              key={video.id}
+              video={video as { id: string; thumbnail_url: string | null }}
+            />
           ))}
         </div>
       </div>
