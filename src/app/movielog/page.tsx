@@ -1,6 +1,14 @@
 import MovieCard from '@/components/ui/MovieCard';
+import { createClient } from '@/lib/supabase/server';
 
-export default function MovieLogPage() {
+export default async function MovieLogPage() {
+  const supabase = createClient();
+  const { data: videos } = await supabase
+    .from('videos')
+    .select('id, thumbnail_url')
+    .order('published_at', { ascending: false })
+    .limit(10);
+
   return (
     <main className="box-border flex min-h-screen flex-col items-center justify-start p-24 text-center">
       <div className="flex flex-col items-center justify-center drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">
@@ -14,9 +22,8 @@ export default function MovieLogPage() {
 
       <div className="mt-12 flex w-full max-w-5xl flex-col items-center justify-center">
         <div className="grid w-full grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {/* トップページまたは一覧に表示される動画カード（ダミー10件） */}
-          {[...Array(10)].map((_, index) => (
-            <MovieCard key={index} />
+          {videos?.map((video) => (
+            <MovieCard key={video.id} video={video as any} />
           ))}
         </div>
       </div>
