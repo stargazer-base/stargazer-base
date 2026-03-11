@@ -70,7 +70,7 @@ export default function Home() {
             </div>
           </li>
         </ul>
-        <div className="mt-12">
+        <div className="mt-12 flex flex-col items-center justify-center gap-6 sm:flex-row">
           <GoogleLoginButton />
           <GuestLoginButton />
         </div>
