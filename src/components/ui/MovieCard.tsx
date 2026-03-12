@@ -77,6 +77,8 @@ export default function MovieCard({ video }: { video?: VideoProps }) {
                   {video?.thumbnail_url && (
                     <Image
                       src={video.thumbnail_url}
+                      width={1280}
+                      height={720}
                       alt="Thumbnail"
                       className="absolute inset-0 h-full w-full object-cover opacity-80 transition-opacity duration-300 hover:opacity-100"
                     />
