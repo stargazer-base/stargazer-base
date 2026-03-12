@@ -1,3 +1,4 @@
+import ButtonArea from '@/components/ui/VideoActionButtons';
 import MovieCard from '@/components/ui/MovieCard';
 import { createClient } from '@/lib/supabase/server';
 
@@ -18,6 +19,9 @@ export default async function MovieLogPage() {
         <p className="mt-4 text-xl text-indigo-100/90">
           YouTube動画視聴ログ管理アプリ
         </p>
+      </div>
+      <div className="mt-8">
+        <ButtonArea />
       </div>
 
       <div className="mt-12 flex w-full max-w-5xl flex-col items-center justify-center">
