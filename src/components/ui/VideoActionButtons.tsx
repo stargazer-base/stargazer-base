@@ -10,7 +10,6 @@ export default function VideoActionButtons() {
   const [isTagEditing, setIsTagEditing] = useState(false);
   const [isCommentEditing, setIsCommentEditing] = useState(false);
   const [isSearchActive, setIsSearchActive] = useState(false);
-  const [isHelpActive, setIsHelpActive] = useState(false);
 
   return (
     <div className="flex gap-3 rounded-lg bg-gray-900/30 p-4">
