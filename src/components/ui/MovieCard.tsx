@@ -1,13 +1,13 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import Link from 'next/link';
+import Image from 'next/image';
 import { useState } from 'react';
 
 // Hydration errorを防ぐためにクライアントサイドでのみロードする
 const ReactPlayer = dynamic(() => import('react-player'), {
   ssr: false,
-}) as any;
+});
 
 type VideoProps = {
   id: string;
@@ -44,7 +44,7 @@ export default function MovieCard({ video }: { video?: VideoProps }) {
         role="button"
         tabIndex={0}
         onClick={handleCardClick}
-        onKeyDown={(e) => e.key === 'Enter' && handleCardClick(e as any)}
+        onKeyDown={(e) => e.key === 'Enter'}
         className={`group relative flex h-full w-full cursor-pointer flex-col items-start justify-start overflow-hidden rounded-2xl border p-4 text-left backdrop-blur-md transition-all duration-500 hover:-translate-y-1 ${
           isWatched
             ? 'border-red-500 bg-red-900/10 shadow-[0_0_20px_rgba(239,68,68,0.3)] hover:shadow-[0_0_30px_rgba(239,68,68,0.4)]'
@@ -75,7 +75,7 @@ export default function MovieCard({ video }: { video?: VideoProps }) {
               {!isPlaying && (
                 <div className="absolute inset-0 z-10 flex cursor-pointer items-center justify-center bg-black">
                   {video?.thumbnail_url && (
-                    <img
+                    <Image
                       src={video.thumbnail_url}
                       alt="Thumbnail"
                       className="absolute inset-0 h-full w-full object-cover opacity-80 transition-opacity duration-300 hover:opacity-100"
