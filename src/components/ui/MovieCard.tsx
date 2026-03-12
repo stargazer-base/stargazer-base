@@ -66,7 +66,7 @@ export default function MovieCard({ video }: { video?: VideoProps }) {
           {videoUrl ? (
             <div className="absolute inset-0 h-full w-full">
               <ReactPlayer
-                url={videoUrl}
+                src={videoUrl}
                 width="100%"
                 height="100%"
                 controls={isPlaying}
