@@ -28,7 +28,7 @@ describe('MovieCard コンポーネント', () => {
     render(<MovieCard />);
 
     // カードを取得 (単一で描写しているため1つだけ取得可能)
-    const card = screen.getByRole('link');
+    const card = screen.getByRole('button');
 
     // 初期状態は赤枠ではない
     expect(card.className).not.toContain('border-red-500');
@@ -46,7 +46,7 @@ describe('MovieCard コンポーネント', () => {
 
     // お気に入りアイコンとカードを取得
     const favoriteIcon = screen.getByLabelText('お気に入り');
-    const card = screen.getByRole('link');
+    const card = screen.getByRole('button');
 
     // 初期状態の確認（未お気に入り、カードは染まっていない）
     expect(favoriteIcon.className).toContain('text-white/40');

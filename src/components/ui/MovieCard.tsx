@@ -1,8 +1,13 @@
 'use client';
 
-import Image from 'next/image';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useState } from 'react';
+
+// Hydration errorを防ぐためにクライアントサイドでのみロードする
+const ReactPlayer = dynamic(() => import('react-player'), {
+  ssr: false,
+}) as any;
 
 type VideoProps = {
   id: string;
@@ -12,9 +17,12 @@ type VideoProps = {
 export default function MovieCard({ video }: { video?: VideoProps }) {
   const [isWatched, setIsWatched] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   // カードクリック時のハンドラー
   const handleCardClick = (e: React.MouseEvent) => {
+    // ReactPlayer（iframe等）のクリックはここには伝播しないことが多いが
+    // カード全体のクリックとして処理する
     e.preventDefault();
     setIsWatched(!isWatched);
   };
@@ -26,12 +34,18 @@ export default function MovieCard({ video }: { video?: VideoProps }) {
     setIsFavorite(!isFavorite);
   };
 
+  const videoUrl = video?.id
+    ? `https://www.youtube.com/watch?v=${video.id}`
+    : '';
+
   return (
     <div className="flex h-full w-full">
-      <Link
-        href="#"
+      <div
+        role="button"
+        tabIndex={0}
         onClick={handleCardClick}
-        className={`group relative flex h-full w-full flex-col items-start justify-start overflow-hidden rounded-2xl border p-4 text-left backdrop-blur-md transition-all duration-500 hover:-translate-y-1 ${
+        onKeyDown={(e) => e.key === 'Enter' && handleCardClick(e as any)}
+        className={`group relative flex h-full w-full cursor-pointer flex-col items-start justify-start overflow-hidden rounded-2xl border p-4 text-left backdrop-blur-md transition-all duration-500 hover:-translate-y-1 ${
           isWatched
             ? 'border-red-500 bg-red-900/10 shadow-[0_0_20px_rgba(239,68,68,0.3)] hover:shadow-[0_0_30px_rgba(239,68,68,0.4)]'
             : 'border-white/10 bg-white/5 shadow-lg hover:border-indigo-400/50 hover:bg-white/10 hover:shadow-[0_0_30px_rgba(129,140,248,0.15)]'
@@ -41,15 +55,43 @@ export default function MovieCard({ video }: { video?: VideoProps }) {
         {isWatched && (
           <div className="pointer-events-none absolute inset-0 -z-10 animate-pulse bg-gradient-to-bl from-red-500/10 via-transparent to-transparent" />
         )}
-        {/* サムネイル画像エリア */}
-        <div className="relative mb-3 aspect-video w-full overflow-hidden rounded-xl border border-white/10 bg-black/50 shadow-inner">
-          <Image
-            src={video?.thumbnail_url || '/placeholder.svg'}
-            alt="動画サムネイルのプレースホルダー"
-            width={640}
-            height={360}
-            className="h-full w-full object-cover opacity-80 transition-transform duration-500 group-hover:scale-105 group-hover:opacity-100"
-          />
+        {/* サムネイル画像・動画プレイヤーエリア */}
+        <div
+          className="relative mb-3 aspect-video w-full overflow-hidden rounded-xl border border-white/10 bg-black/50 shadow-inner transition-transform duration-500 group-hover:scale-105"
+          onClick={(e) => {
+            e.stopPropagation();
+            if (!isPlaying) setIsPlaying(true);
+          }}
+        >
+          {videoUrl ? (
+            <div className="absolute inset-0 h-full w-full">
+              <ReactPlayer
+                url={videoUrl}
+                width="100%"
+                height="100%"
+                controls={isPlaying}
+                playing={isPlaying}
+              />
+              {!isPlaying && (
+                <div className="absolute inset-0 z-10 flex cursor-pointer items-center justify-center bg-black">
+                  {video?.thumbnail_url && (
+                    <img
+                      src={video.thumbnail_url}
+                      alt="Thumbnail"
+                      className="absolute inset-0 h-full w-full object-cover opacity-80 transition-opacity duration-300 hover:opacity-100"
+                    />
+                  )}
+                  <div className="z-20 flex h-12 w-12 items-center justify-center rounded-full bg-red-600/90 text-white shadow-lg backdrop-blur-sm transition-transform hover:scale-110">
+                    ▶
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="flex h-full w-full items-center justify-center text-gray-500">
+              No Video
+            </div>
+          )}
 
           {/* 右上のステータスアイコン（★お気に入りのみ） */}
           <div className="absolute right-2 top-2 z-10 flex gap-2">
@@ -88,7 +130,7 @@ export default function MovieCard({ video }: { video?: VideoProps }) {
             最高にエモかった！最後の曲泣ける...。推しの歌声が星空みたいにキラキラしてて、何度でも見返したくなる伝説の配信。
           </p>
         </div>
-      </Link>
+      </div>
     </div>
   );
 }
