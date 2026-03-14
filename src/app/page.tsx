@@ -18,6 +18,7 @@ export default function Home() {
         <p className="mt-2 tracking-[0.2em]">★★★★★★</p>
         <p className="mt-2 tracking-[0.4em]">★★★★★★</p>
         <p className="mt-2 tracking-[0.5em]">★★★★★★★</p>
+        <p className="mt-2 tracking-[0.3em]">★★★★★★</p>
       </div>
       <div className="flex w-full max-w-5xl flex-col items-center justify-center">
         <ul className="mt-12 grid w-full grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
