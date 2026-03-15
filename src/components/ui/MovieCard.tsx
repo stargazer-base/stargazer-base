@@ -1,7 +1,6 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import Image from 'next/image';
 import { useState } from 'react';
 
 // Hydration errorを防ぐためにクライアントサイドでのみロードする
@@ -11,13 +10,10 @@ const ReactPlayer = dynamic(() => import('react-player'), {
 
 type VideoProps = {
   id: string;
-  thumbnail_url: string | null;
 };
 
 export default function MovieCard({ video }: { video?: VideoProps }) {
   const [isWatched, setIsWatched] = useState(false);
-  const [isFavorite, setIsFavorite] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
 
   // カードクリック時のハンドラー
   const handleCardClick = (e: React.MouseEvent) => {
@@ -25,13 +21,6 @@ export default function MovieCard({ video }: { video?: VideoProps }) {
     // カード全体のクリックとして処理する
     e.preventDefault();
     setIsWatched(!isWatched);
-  };
-
-  // お気に入りクリック時のハンドラー
-  const handleFavoriteClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation(); // カード自体のクリックイベント（推し色化）への伝播を防ぐ
-    setIsFavorite(!isFavorite);
   };
 
   const videoUrl = video?.id
@@ -51,16 +40,11 @@ export default function MovieCard({ video }: { video?: VideoProps }) {
             : 'border-white/10 bg-white/5 shadow-lg hover:border-indigo-400/50 hover:bg-white/10 hover:shadow-[0_0_30px_rgba(129,140,248,0.15)]'
         }`}
       >
-        {/* きらめきアニメーション用エフェクト（視聴済み時） */}
-        {isWatched && (
-          <div className="pointer-events-none absolute inset-0 -z-10 animate-pulse bg-gradient-to-bl from-red-500/10 via-transparent to-transparent" />
-        )}
         {/* サムネイル画像・動画プレイヤーエリア */}
         <div
           className="relative mb-3 aspect-video w-full overflow-hidden rounded-xl border border-white/10 bg-black/50 shadow-inner transition-transform duration-500 group-hover:scale-105"
           onClick={(e) => {
             e.stopPropagation();
-            if (!isPlaying) setIsPlaying(true);
           }}
         >
           {videoUrl ? (
@@ -69,47 +53,16 @@ export default function MovieCard({ video }: { video?: VideoProps }) {
                 src={videoUrl}
                 width="100%"
                 height="100%"
-                controls={isPlaying}
-                playing={isPlaying}
+                controls={true} // 動画の操作ができる（ミュート、速度変更など）
+                light={true} // 軽量表示（クリックで再生できる）
+                playing={true} // 自動再生
               />
-              {!isPlaying && (
-                <div className="absolute inset-0 z-10 flex cursor-pointer items-center justify-center bg-black">
-                  {video?.thumbnail_url && (
-                    <Image
-                      src={video.thumbnail_url}
-                      width={1280}
-                      height={720}
-                      alt="Thumbnail"
-                      className="absolute inset-0 h-full w-full object-cover opacity-80 transition-opacity duration-300 hover:opacity-100"
-                    />
-                  )}
-                  <div className="z-20 flex h-12 w-12 items-center justify-center rounded-full bg-red-600/90 text-white shadow-lg backdrop-blur-sm transition-transform hover:scale-110">
-                    ▶
-                  </div>
-                </div>
-              )}
             </div>
           ) : (
             <div className="flex h-full w-full items-center justify-center text-gray-500">
               No Video
             </div>
           )}
-
-          {/* 右上のステータスアイコン（★お気に入りのみ） */}
-          <div className="absolute right-2 top-2 z-10 flex gap-2">
-            <span
-              onClick={handleFavoriteClick}
-              className={`flex h-7 w-7 cursor-pointer items-center justify-center rounded-full shadow-md backdrop-blur-md transition-all duration-300 hover:scale-110 ${
-                isFavorite
-                  ? 'bg-yellow-400/20 text-yellow-300 shadow-[0_0_10px_rgba(253,224,71,0.5)]'
-                  : 'bg-white/10 text-white/40 hover:bg-white/20 hover:text-white/70'
-              }`}
-              title="お気に入り"
-              aria-label="お気に入り"
-            >
-              ★
-            </span>
-          </div>
         </div>
 
         {/* テキスト情報エリア（推し活特化） */}
