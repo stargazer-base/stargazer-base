@@ -48,9 +48,9 @@ export interface TextProps {
  */
 const styles: Record<TextVariant, string> = {
   pageTitle: 'text-4xl font-bold text-indigo-50 tracking-tight',
-  subTitle: 'text-lg font-normal text-indigo-200',
+  subTitle: 'text-lg font-normal text-indigo-300',
   heading: 'text-2xl font-semibold text-indigo-100',
-  subHeading: 'text-base font-bold text-indigo-200',
+  subHeading: 'text-base font-bold text-indigo-300',
   body: 'text-sm font-normal text-indigo-50 leading-relaxed',
   detail: 'text-[10px] font-normal text-indigo-200 uppercase tracking-wider',
 };
