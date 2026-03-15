@@ -1,20 +1,20 @@
-import GoogleLoginButton from '@/components/ui/GoogleLoginButton';
-import GuestLoginButton from '@/components/ui/GuestLoginButton';
 import Image from 'next/image';
 import Link from 'next/link';
+import { Text } from '@/components/ui/Text';
 
 export default function Home() {
   return (
-    <main className="box-border flex flex-col items-center justify-center p-24 text-center">
-      <div className="flex flex-col items-center justify-center drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">
-        <h1 className="text-4xl font-bold tracking-wider text-white">
-          推し天文台 - Stargazer Base
-        </h1>
-        <p className="mt-4 text-xl text-indigo-100/90">
+    <main className="flex flex-col items-center justify-center px-8 py-24 text-center">
+      {/* タイトルとサブタイトル */}
+      <div className="title-top-page">
+        <Text variant="pageTitle">推し天文台</Text>
+        <Text variant="subTitle" className="mt-4">
           推し(星)を特等席で眺め続けるための前線基地
-        </p>
+        </Text>
       </div>
-      <div className="flex flex-col items-center justify-center text-yellow-200/80 drop-shadow-[0_0_8px_rgba(253,230,138,0.5)]">
+
+      {/* STPRファミリーの星たち */}
+      <div className="text-yellow-200/80 drop-shadow-[0_0_8px_rgba(253,230,138,0.5)]">
         <p className="mt-8 tracking-[0.5em]">★★★★★★</p>
         <p className="mt-2 tracking-[0.3em]">★★★★</p>
         <p className="mt-2 tracking-[0.2em]">★★★★★★</p>
@@ -22,8 +22,11 @@ export default function Home() {
         <p className="mt-2 tracking-[0.5em]">★★★★★★★</p>
         <p className="mt-2 tracking-[0.3em]">★★★★★★</p>
       </div>
+
+      {/* アプリ一覧 */}
       <div className="flex w-full max-w-5xl flex-col items-center justify-center">
         <ul className="mt-12 grid w-full grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {/* 推し色に染まる */}
           <li className="flex h-full w-full">
             <Link
               href="/movielog"
@@ -38,43 +41,46 @@ export default function Home() {
                   className="h-auto w-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
               </div>
-              <h2 className="text-xl font-bold text-white transition-colors group-hover:text-indigo-200">
+              <Text
+                variant="heading"
+                className="transition-colors group-hover:text-indigo-200"
+              >
                 推し色に染まる
-              </h2>
-              <p className="mt-1 text-sm text-indigo-200/80">
+              </Text>
+              <Text variant="subHeading" className="mt-1">
                 YouTube動画視聴ログ管理アプリ
-              </p>
-              <ul className="mt-5 space-y-2 text-sm text-slate-300">
-                <li className="flex items-start">
+              </Text>
+              <ul className="mt-5 space-y-2">
+                <li className="flex justify-start">
                   <span className="mr-2 text-indigo-400">✦</span>
-                  推しの軌跡を一覧化
+                  <Text variant="body">推しの軌跡を一覧化</Text>
                 </li>
-                <li className="flex items-start">
+                <li className="flex justify-start">
                   <span className="mr-2 text-indigo-400">✦</span>
-                  未視聴をサクッと発掘
+                  <Text variant="body">未視聴をサクッと発掘</Text>
                 </li>
-                <li className="flex items-start">
+                <li className="flex justify-start">
                   <span className="mr-2 text-indigo-400">✦</span>
-                  推しへの染まり度を可視化
+                  <Text variant="body">推しへの染まり度を可視化</Text>
                 </li>
               </ul>
             </Link>
           </li>
+
+          {/* Coming soon */}
           <li className="flex h-full w-full">
             <div className="flex h-full w-full flex-col items-center justify-center rounded-2xl border border-white/5 bg-white/5 p-6 text-center backdrop-blur-md">
               <span className="text-indigo-200/50">Coming soon ...</span>
             </div>
           </li>
+
+          {/* Coming soon */}
           <li className="flex h-full w-full">
             <div className="flex h-full w-full flex-col items-center justify-center rounded-2xl border border-white/5 bg-white/5 p-6 text-center backdrop-blur-md">
               <span className="text-indigo-200/50">Coming soon ...</span>
             </div>
           </li>
         </ul>
-        <div className="mt-12 flex flex-col items-center justify-center gap-6 sm:flex-row">
-          <GoogleLoginButton />
-          <GuestLoginButton />
-        </div>
       </div>
     </main>
   );

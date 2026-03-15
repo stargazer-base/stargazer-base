@@ -30,7 +30,7 @@ describe('メイン画面', () => {
 
     // タイトルを取得
     const title = screen.getByRole('heading', {
-      name: '推し天文台 - Stargazer Base',
+      name: '推し天文台',
       level: 1,
     });
 
