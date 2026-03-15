@@ -93,6 +93,7 @@ export const Text = ({
     ? 'drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]'
     : '';
 
+  // コンポーネント本体の出力
   return (
     <Component className={`${styles[variant]} ${glowClass} ${className}`}>
       {children}
