@@ -8,7 +8,7 @@ export default async function MovieLogPage() {
     .from('videos')
     .select('id, thumbnail_url')
     .order('published_at', { ascending: false })
-    .limit(10);
+    .limit(2);
 
   return (
     <main className="box-border flex min-h-screen flex-col items-center justify-start p-24 text-center">
@@ -27,10 +27,7 @@ export default async function MovieLogPage() {
       <div className="mt-12 flex w-full max-w-5xl flex-col items-center justify-center">
         <div className="grid w-full grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {videos?.map((video) => (
-            <MovieCard
-              key={video.id}
-              video={video as { id: string; thumbnail_url: string | null }}
-            />
+            <MovieCard key={video.id} video={video as { id: string }} />
           ))}
         </div>
       </div>
