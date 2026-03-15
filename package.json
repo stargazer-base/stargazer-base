@@ -9,6 +9,7 @@
     "lint": "next lint",
     "test": "vitest",
     "test:watch": "vitest --watch",
+    "test:unit": "vitest run --exclude=\"**/*.stories.*\"",
     "format": "prettier --write --ignore-path .gitignore './**/*.{js,jsx,ts,tsx,json,css}'",
     "supabase:gen": "npm run supabase:gen:app && npm run supabase:gen:master",
     "supabase:gen:app": "npx supabase gen types typescript --project-id <APP_PROJECT_ID> > src/types/supabase.ts",
