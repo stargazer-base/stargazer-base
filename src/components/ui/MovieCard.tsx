@@ -2,6 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import { useState } from 'react';
+import { Text } from '@/components/ui/Text';
 
 // Hydration errorを防ぐためにクライアントサイドでのみロードする
 const ReactPlayer = dynamic(() => import('react-player'), {
@@ -42,7 +43,7 @@ export default function MovieCard({ video }: { video?: VideoProps }) {
       >
         {/* サムネイル画像・動画プレイヤーエリア */}
         <div
-          className="relative mb-3 aspect-video w-full overflow-hidden rounded-xl border border-white/10 bg-black/50 shadow-inner transition-transform duration-500 group-hover:scale-105"
+          className="relative mb-4 aspect-video w-full overflow-hidden rounded-xl border border-white/10 bg-black/50 shadow-inner transition-transform duration-500 group-hover:scale-105"
           onClick={(e) => {
             e.stopPropagation();
           }}
@@ -68,22 +69,22 @@ export default function MovieCard({ video }: { video?: VideoProps }) {
         {/* テキスト情報エリア（推し活特化） */}
         <div className="flex w-full flex-col gap-2">
           {/* ユーザ作成のタグリスト */}
-          <div className="flex flex-wrap gap-2 text-[10px] font-medium sm:text-xs">
-            <span className="rounded-full border border-indigo-500/30 bg-indigo-900/40 px-2.5 py-1 text-indigo-200">
-              #初配信
+          <div className="flex flex-wrap gap-2">
+            <span className="flex items-center rounded-full border border-indigo-500/30 bg-indigo-900/40 px-2.5 py-1">
+              <Text variant="detail">#初配信</Text>
             </span>
-            <span className="rounded-full border border-indigo-500/30 bg-indigo-900/40 px-2.5 py-1 text-indigo-200">
-              #歌枠
+            <span className="flex items-center rounded-full border border-indigo-500/30 bg-indigo-900/40 px-2.5 py-1">
+              <Text variant="detail">#歌枠</Text>
             </span>
-            <span className="rounded-full border border-indigo-500/30 bg-indigo-900/40 px-2.5 py-1 text-indigo-200">
-              #神セトリ
+            <span className="flex items-center rounded-full border border-indigo-500/30 bg-indigo-900/40 px-2.5 py-1">
+              <Text variant="detail">#神セトリ</Text>
             </span>
           </div>
 
           {/* ユーザのコメント（推奨60文字前後、省略なしで全表示） */}
-          <p className="mt-1 text-xs leading-relaxed text-indigo-100/90 sm:text-sm">
+          <Text variant="body" className="mt-1 leading-relaxed">
             最高にエモかった！最後の曲泣ける...。推しの歌声が星空みたいにキラキラしてて、何度でも見返したくなる伝説の配信。
-          </p>
+          </Text>
         </div>
       </div>
     </div>

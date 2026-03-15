@@ -38,21 +38,21 @@ export interface TextProps {
 // 2. 静的データ・ロジック
 // ==========================================
 /**
- * Textコンポーネントのスタイル
- * - pageTitle: 1.875rem (30px) font-weight: 700 text-white tracking-tight
- * - subTitle: 1.25rem (20px) font-weight: 400 text-indigo-300
- * - heading: 1.5rem (24px) font-weight: 600 text-indigo-100
- * - subHeading: 1.125rem (18px) font-weight: 500 text-indigo-200
- * - body: 1rem (16px) font-weight: 400 text-indigo-50
- * - detail: 0.875rem (14px) font-weight: 400 text-indigo-400
+ * Textコンポーネントのスタイル定義
+ * * - pageTitle: 36px (text-4xl) / Bold / ページ最上部用
+ * - subTitle:  18px (text-lg)  / Normal / タイトル補足
+ * - heading:   24px (text-2xl) / SemiBold / セクション見出し
+ * - subHeading: 16px (text-base) / Bold / 小見出し
+ * - body:      14px (text-sm)   / Normal / コンテンツ本文
+ * - detail:    10px (text-[10px]) / Normal / タグ、注釈、詳細情報
  */
 const styles: Record<TextVariant, string> = {
-  pageTitle: 'text-3xl font-bold text-white tracking-tight',
-  subTitle: 'text-xl font-normal text-indigo-300',
+  pageTitle: 'text-4xl font-bold text-indigo-50 tracking-tight',
+  subTitle: 'text-lg font-normal text-indigo-200',
   heading: 'text-2xl font-semibold text-indigo-100',
-  subHeading: 'text-lg font-medium text-indigo-200',
-  body: 'text-base font-normal text-indigo-50',
-  detail: 'text-sm font-normal text-indigo-400',
+  subHeading: 'text-base font-bold text-indigo-200',
+  body: 'text-sm font-normal text-indigo-50 leading-relaxed',
+  detail: 'text-[10px] font-normal text-indigo-200 uppercase tracking-wider',
 };
 
 /**
@@ -62,7 +62,7 @@ const styles: Record<TextVariant, string> = {
  * - heading: h2
  * - subHeading: h3
  * - body: p
- * - detail: p
+ * - detail: span
  */
 const tags: Record<TextVariant, keyof JSX.IntrinsicElements> = {
   pageTitle: 'h1',
@@ -70,7 +70,7 @@ const tags: Record<TextVariant, keyof JSX.IntrinsicElements> = {
   heading: 'h2',
   subHeading: 'h3',
   body: 'p',
-  detail: 'p',
+  detail: 'span',
 };
 
 // ==========================================
