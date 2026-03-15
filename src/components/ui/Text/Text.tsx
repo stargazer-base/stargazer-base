@@ -84,11 +84,11 @@ export const Text = ({
 }: TextProps) => {
   const Component = tags[variant];
 
-  // glowが明示的に渡されていなければ、タイトル系だけ自動でtrueにする。
+  // glowが明示的に渡されていなければ、タイトル系だけ自動でtrueにする
   const shouldGlow =
     glow ?? (variant === 'pageTitle' || variant === 'subTitle');
 
-  // 光る場合のみ、先ほどの美しいdrop-shadowクラスを付与する
+  // 光る場合drop-shadowクラスを付与する
   const glowClass = shouldGlow
     ? 'drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]'
     : '';
