@@ -18,6 +18,9 @@
     "build-storybook": "storybook build"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^7.2.0",
+    "@fortawesome/free-solid-svg-icons": "^7.2.0",
+    "@fortawesome/react-fontawesome": "^3.2.0",
     "@storybook/nextjs": "^10.2.19",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.98.0",
