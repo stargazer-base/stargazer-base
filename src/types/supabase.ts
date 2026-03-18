@@ -16,44 +16,47 @@ export type Database = {
     Tables: {
       channels: {
         Row: {
-          color_code: string | null;
-          created_at: string | null;
+          color_code: string;
+          created_at: string;
+          disp_order: number;
           group_name: string | null;
           group_name_jp: string | null;
           id: string;
-          is_deleted: boolean | null;
+          is_deleted: boolean;
           is_initial_sync_done: boolean;
           name: string;
-          name_jp: string | null;
-          updated_at: string | null;
+          name_jp: string;
+          updated_at: string;
           upload_playlist_id: string | null;
           youtube_channel_id: string;
         };
         Insert: {
-          color_code?: string | null;
-          created_at?: string | null;
+          color_code: string;
+          created_at?: string;
+          disp_order?: number;
           group_name?: string | null;
           group_name_jp?: string | null;
           id?: string;
-          is_deleted?: boolean | null;
+          is_deleted?: boolean;
           is_initial_sync_done?: boolean;
           name: string;
-          name_jp?: string | null;
-          updated_at?: string | null;
+          name_jp: string;
+          updated_at?: string;
           upload_playlist_id?: string | null;
           youtube_channel_id: string;
         };
         Update: {
-          color_code?: string | null;
-          created_at?: string | null;
+          color_code?: string;
+          created_at?: string;
+          disp_order?: number;
           group_name?: string | null;
           group_name_jp?: string | null;
           id?: string;
-          is_deleted?: boolean | null;
+          is_deleted?: boolean;
           is_initial_sync_done?: boolean;
           name?: string;
-          name_jp?: string | null;
-          updated_at?: string | null;
+          name_jp?: string;
+          updated_at?: string;
           upload_playlist_id?: string | null;
           youtube_channel_id?: string;
         };
@@ -62,26 +65,26 @@ export type Database = {
       oshis: {
         Row: {
           channel_id: string;
-          created_at: string | null;
+          created_at: string;
           id: string;
-          is_deleted: boolean | null;
-          updated_at: string | null;
+          is_deleted: boolean;
+          updated_at: string;
           user_id: string;
         };
         Insert: {
           channel_id: string;
-          created_at?: string | null;
+          created_at?: string;
           id?: string;
-          is_deleted?: boolean | null;
-          updated_at?: string | null;
+          is_deleted?: boolean;
+          updated_at?: string;
           user_id: string;
         };
         Update: {
           channel_id?: string;
-          created_at?: string | null;
+          created_at?: string;
           id?: string;
-          is_deleted?: boolean | null;
-          updated_at?: string | null;
+          is_deleted?: boolean;
+          updated_at?: string;
           user_id?: string;
         };
         Relationships: [
@@ -96,27 +99,27 @@ export type Database = {
       };
       tags: {
         Row: {
-          created_at: string | null;
+          created_at: string;
           id: string;
-          is_deleted: boolean | null;
+          is_deleted: boolean;
           name: string;
-          updated_at: string | null;
+          updated_at: string;
           user_id: string;
         };
         Insert: {
-          created_at?: string | null;
+          created_at?: string;
           id?: string;
-          is_deleted?: boolean | null;
+          is_deleted?: boolean;
           name: string;
-          updated_at?: string | null;
+          updated_at?: string;
           user_id: string;
         };
         Update: {
-          created_at?: string | null;
+          created_at?: string;
           id?: string;
-          is_deleted?: boolean | null;
+          is_deleted?: boolean;
           name?: string;
-          updated_at?: string | null;
+          updated_at?: string;
           user_id?: string;
         };
         Relationships: [];
@@ -124,34 +127,34 @@ export type Database = {
       video_logs: {
         Row: {
           comment: string | null;
-          created_at: string | null;
+          created_at: string;
           id: string;
-          is_deleted: boolean | null;
+          is_deleted: boolean;
           is_favorite: boolean | null;
           is_watched: boolean | null;
-          updated_at: string | null;
+          updated_at: string;
           user_id: string;
           youtube_video_id: string;
         };
         Insert: {
           comment?: string | null;
-          created_at?: string | null;
+          created_at?: string;
           id?: string;
-          is_deleted?: boolean | null;
+          is_deleted?: boolean;
           is_favorite?: boolean | null;
           is_watched?: boolean | null;
-          updated_at?: string | null;
+          updated_at?: string;
           user_id: string;
           youtube_video_id: string;
         };
         Update: {
           comment?: string | null;
-          created_at?: string | null;
+          created_at?: string;
           id?: string;
-          is_deleted?: boolean | null;
+          is_deleted?: boolean;
           is_favorite?: boolean | null;
           is_watched?: boolean | null;
-          updated_at?: string | null;
+          updated_at?: string;
           user_id?: string;
           youtube_video_id?: string;
         };
@@ -167,29 +170,29 @@ export type Database = {
       };
       video_tags: {
         Row: {
-          created_at: string | null;
+          created_at: string;
           id: string;
-          is_deleted: boolean | null;
+          is_deleted: boolean;
           tag_id: string;
-          updated_at: string | null;
+          updated_at: string;
           user_id: string;
           youtube_video_id: string;
         };
         Insert: {
-          created_at?: string | null;
+          created_at?: string;
           id?: string;
-          is_deleted?: boolean | null;
+          is_deleted?: boolean;
           tag_id: string;
-          updated_at?: string | null;
+          updated_at?: string;
           user_id: string;
           youtube_video_id: string;
         };
         Update: {
-          created_at?: string | null;
+          created_at?: string;
           id?: string;
-          is_deleted?: boolean | null;
+          is_deleted?: boolean;
           tag_id?: string;
-          updated_at?: string | null;
+          updated_at?: string;
           user_id?: string;
           youtube_video_id?: string;
         };
@@ -216,13 +219,13 @@ export type Database = {
           comment_count: number | null;
           duration: string | null;
           id: string;
-          is_deleted: boolean | null;
+          is_deleted: boolean;
           like_count: number | null;
           published_at: string;
           raw_data: Json | null;
           thumbnail_url: string | null;
           title: string;
-          updated_at: string | null;
+          updated_at: string;
           video_type: string;
           view_count: number | null;
         };
@@ -231,13 +234,13 @@ export type Database = {
           comment_count?: number | null;
           duration?: string | null;
           id: string;
-          is_deleted?: boolean | null;
+          is_deleted?: boolean;
           like_count?: number | null;
           published_at: string;
           raw_data?: Json | null;
           thumbnail_url?: string | null;
           title: string;
-          updated_at?: string | null;
+          updated_at?: string;
           video_type?: string;
           view_count?: number | null;
         };
@@ -246,13 +249,13 @@ export type Database = {
           comment_count?: number | null;
           duration?: string | null;
           id?: string;
-          is_deleted?: boolean | null;
+          is_deleted?: boolean;
           like_count?: number | null;
           published_at?: string;
           raw_data?: Json | null;
           thumbnail_url?: string | null;
           title?: string;
-          updated_at?: string | null;
+          updated_at?: string;
           video_type?: string;
           view_count?: number | null;
         };
