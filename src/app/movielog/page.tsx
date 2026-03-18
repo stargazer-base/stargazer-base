@@ -1,14 +1,29 @@
-import MovieCard from '@/components/ui/MovieCard';
 import { createClient } from '@/lib/supabase/server';
 import { Text } from '@/components/ui/Text';
+import MovieLogClient from './components/MovieLogClient';
 
 export default async function MovieLogPage() {
   const supabase = createClient();
+
+  // 動画の取得
   const { data: videos } = await supabase
     .from('videos')
-    .select('id, thumbnail_url')
+    .select('id, thumbnail_url, channel_id')
     .order('published_at', { ascending: false })
-    .limit(20);
+    .limit(100);
+
+  // 推し（チャンネル）の取得
+  const { data: channels } = await supabase
+    .from('channels')
+    .select('id, name_jp')
+    .eq('is_deleted', false)
+    .order('disp_order', { ascending: true });
+
+  // タグの取得
+  const { data: tags } = await supabase
+    .from('tags')
+    .select('id, name')
+    .eq('is_deleted', false);
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-start px-8 py-24">
@@ -20,14 +35,12 @@ export default async function MovieLogPage() {
         </Text>
       </div>
 
-      {/* 動画カードリスト */}
-      <div className="mt-12 flex w-full max-w-5xl flex-col items-center justify-center">
-        <div className="grid w-full grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {videos?.map((video) => (
-            <MovieCard key={video.id} video={video as { id: string }} />
-          ))}
-        </div>
-      </div>
+      {/* クライアント側コンポーネントで検索と動画一覧を管理 */}
+      <MovieLogClient
+        initialVideos={videos || []}
+        oshis={channels || []}
+        tags={tags || []}
+      />
     </main>
   );
 }

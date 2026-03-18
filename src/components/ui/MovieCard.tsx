@@ -13,15 +13,31 @@ type VideoProps = {
   id: string;
 };
 
-export default function MovieCard({ video }: { video?: VideoProps }) {
-  const [isWatched, setIsWatched] = useState(false);
+export default function MovieCard({
+  video,
+  isWatched,
+  onWatchChange,
+}: {
+  video?: VideoProps;
+  isWatched?: boolean;
+  onWatchChange?: (isWatched: boolean) => void;
+}) {
+  const [internalIsWatched, setInternalIsWatched] = useState(false);
+
+  const watched = isWatched !== undefined ? isWatched : internalIsWatched;
 
   // カードクリック時のハンドラー
   const handleCardClick = (e: React.MouseEvent) => {
     // ReactPlayer（iframe等）のクリックはここには伝播しないことが多いが
     // カード全体のクリックとして処理する
-    e.preventDefault();
-    setIsWatched(!isWatched);
+    e.stopPropagation();
+    const newWatched = !watched;
+    if (isWatched === undefined) {
+      setInternalIsWatched(newWatched);
+    }
+    if (onWatchChange) {
+      onWatchChange(newWatched);
+    }
   };
 
   const videoUrl = video?.id
@@ -36,7 +52,7 @@ export default function MovieCard({ video }: { video?: VideoProps }) {
         onClick={handleCardClick}
         onKeyDown={(e) => e.key === 'Enter'}
         className={`group relative flex h-full w-full cursor-pointer flex-col items-start justify-start overflow-hidden rounded-2xl border p-4 text-left backdrop-blur-md transition-all duration-500 hover:-translate-y-1 ${
-          isWatched
+          watched
             ? 'border-red-500 bg-red-900/10 shadow-[0_0_20px_rgba(239,68,68,0.3)] hover:shadow-[0_0_30px_rgba(239,68,68,0.4)]'
             : 'border-white/10 bg-white/5 shadow-lg hover:border-indigo-400/50 hover:bg-white/10 hover:shadow-[0_0_30px_rgba(129,140,248,0.15)]'
         }`}
@@ -83,7 +99,7 @@ export default function MovieCard({ video }: { video?: VideoProps }) {
 
           {/* ユーザのコメント（推奨60文字前後、省略なしで全表示） */}
           <Text variant="body" className="mt-1 leading-relaxed">
-            最高にエモかった！最後の曲泣ける...。推しの歌声が星空みたいにキラキラしてて、何度でも見返したくなる伝説の配信。
+            自分用一言コメントを60文字くらいでここに記載できます。Coming soon...
           </Text>
         </div>
       </div>
