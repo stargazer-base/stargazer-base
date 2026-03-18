@@ -4,19 +4,20 @@ import MovieLogClient from './components/MovieLogClient';
 
 export default async function MovieLogPage() {
   const supabase = createClient();
-  
+
   // 動画の取得
   const { data: videos } = await supabase
     .from('videos')
     .select('id, thumbnail_url, channel_id')
     .order('published_at', { ascending: false })
-    .limit(20);
+    .limit(100);
 
   // 推し（チャンネル）の取得
   const { data: channels } = await supabase
     .from('channels')
-    .select('id, name')
-    .eq('is_deleted', false);
+    .select('id, name_jp')
+    .eq('is_deleted', false)
+    .order('disp_order', { ascending: true });
 
   // タグの取得
   const { data: tags } = await supabase

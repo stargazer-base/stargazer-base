@@ -2,20 +2,32 @@ import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import MovieLogPage from './page';
 
-// Supabaseクライアントのモック
-vi.mock('@/lib/supabase/server', () => ({
-  createClient: () => ({
+// Supabaseクライアントのモック修正版
+vi.mock('@/lib/supabase/server', () => {
+  // すべてのチェーン用メソッドが自分自身を返すように定義
+  const mockQueryBuilder = {
     from: vi.fn().mockReturnThis(),
     select: vi.fn().mockReturnThis(),
-    order: vi.fn().mockReturnThis(),
-    limit: vi.fn().mockResolvedValue({
-      data: [
-        { id: 'video1', thumbnail_url: 'https://example.com/thumb1.jpg' },
-        { id: 'video2', thumbnail_url: 'https://example.com/thumb2.jpg' },
-      ],
+    eq: vi.fn().mockReturnThis(),
+    order: vi.fn().mockReturnThis(), // これも return this に変更！
+    limit: vi.fn().mockReturnThis(), // 追加
+    // 最後に await された時に返るデータ
+    // Supabaseのクエリビルダは、最後に Promise（then）を介してデータを返します
+    then: vi.fn((resolve) => {
+      resolve({
+        data: [
+          { id: '1', name_jp: '公式チャンネル', thumbnail_url: '...' },
+          { id: '2', name_jp: 'サブチャンネル', thumbnail_url: '...' },
+        ],
+        error: null,
+      });
     }),
-  }),
-}));
+  };
+
+  return {
+    createClient: () => mockQueryBuilder,
+  };
+});
 
 describe('MovieLog：推し色に染まる', () => {
   it('タイトルの見出しがh1（見出しレベル1）で正しく表示されること', async () => {
