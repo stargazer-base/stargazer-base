@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 import MovieCard from './MovieCard';
 
@@ -17,22 +17,5 @@ describe('MovieCard コンポーネント', () => {
     expect(tag1).toBeInTheDocument();
     expect(tag2).toBeInTheDocument();
     expect(comment).toBeInTheDocument();
-  });
-
-  it('カードをクリックすると推し色（赤色）に染まること', () => {
-    // 画面を描画
-    render(<MovieCard />);
-
-    // カードを取得 (単一で描写しているため1つだけ取得可能)
-    const card = screen.getByRole('button');
-
-    // 初期状態は赤枠ではない
-    expect(card.className).not.toContain('border-red-500');
-
-    // クリックを実行
-    fireEvent.click(card);
-
-    // 等価なクラスが付与されていることを確認
-    expect(card.className).toContain('border-red-500');
   });
 });

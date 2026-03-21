@@ -22,6 +22,13 @@ vi.mock('@/lib/supabase/server', () => {
         error: null,
       });
     }),
+    auth: {
+      // getUserをモック関数として定義（ここではまだ戻り値は設定しない）
+      getUser: vi.fn().mockResolvedValue({
+        data: { user: { id: 'test-user-id' } },
+        error: null,
+      }),
+    },
   };
 
   return {
