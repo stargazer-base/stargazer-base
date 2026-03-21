@@ -16,14 +16,15 @@ interface SearchSectionProps {
   oshis: { id: string; name_jp: string }[];
   tags: { id: string; name: string }[];
   onApply: (filters: FilterState) => void;
+  isOpen: boolean;
 }
 
 export default function SearchSection({
   oshis,
   tags,
   onApply,
+  isOpen,
 }: SearchSectionProps) {
-  const [isOpen, setIsOpen] = useState(false);
   const [keyword, setKeyword] = useState('');
 
   // フィルター状態
@@ -78,22 +79,11 @@ export default function SearchSection({
   };
 
   return (
-    <div className="mt-12 flex w-full max-w-5xl flex-col items-center justify-center">
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          setIsOpen(!isOpen);
-        }}
-        className="flex items-center gap-2 rounded-full bg-white/10 px-8 py-3 text-white/70 shadow-[0_0_15px_rgba(255,255,255,0.1)] backdrop-blur-md transition-all duration-300 hover:scale-105 hover:bg-white/20 hover:text-white hover:shadow-[0_0_20px_rgba(255,255,255,0.2)]"
-      >
-        <FontAwesomeIcon icon={faMagnifyingGlass} className="text-lg" />
-        <span className="font-medium tracking-wider">検索</span>
-      </button>
-
+    <div className="flex w-full max-w-5xl flex-col items-center justify-center">
       {/* 検索パネル */}
       <div
-        className={`mt-6 w-full max-w-2xl overflow-hidden transition-all duration-500 ease-in-out ${
-          isOpen ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'
+        className={`w-full max-w-2xl overflow-hidden transition-all duration-500 ease-in-out ${
+          isOpen ? 'mt-6 max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'
         }`}
       >
         <div className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-xl backdrop-blur-lg">

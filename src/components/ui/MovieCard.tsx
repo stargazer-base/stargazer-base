@@ -17,10 +17,12 @@ export default function MovieCard({
   video,
   isWatched,
   onWatchChange,
+  glowColor,
 }: {
   video?: VideoProps;
   isWatched?: boolean;
   onWatchChange?: (isWatched: boolean) => void;
+  glowColor?: string | null;
 }) {
   const [isPlaying, setIsPlaying] = useState(true);
   const [internalIsWatched, setInternalIsWatched] = useState(false);
@@ -45,18 +47,26 @@ export default function MovieCard({
     ? `https://www.youtube.com/watch?v=${video.id}`
     : '';
 
+  const glowStyle = watched && glowColor ? {
+    '--glow-color': glowColor,
+    '--glow-bg': `${glowColor}1A`, // 10% opacity
+    '--glow-shadow-1': `${glowColor}4D`, // 30% opacity
+    '--glow-shadow-2': `${glowColor}66`, // 40% opacity
+  } as React.CSSProperties : {};
+
   return (
     <div className="flex h-full w-full">
       <div
         role="button"
         tabIndex={0}
+        style={glowStyle}
         onClick={(e) => {
           e.stopPropagation();
           handleCardClick(e);
         }}
         className={`group relative flex h-full w-full cursor-pointer flex-col items-start justify-start overflow-hidden rounded-2xl border p-4 text-left backdrop-blur-md transition-all duration-500 hover:-translate-y-1 ${
           watched
-            ? 'border-red-500 bg-red-900/10 shadow-[0_0_20px_rgba(239,68,68,0.3)] hover:shadow-[0_0_30px_rgba(239,68,68,0.4)]'
+            ? 'border-[var(--glow-color,#ef4444)] bg-[var(--glow-bg,rgba(127,29,29,0.1))] shadow-[0_0_20px_var(--glow-shadow-1,rgba(239,68,68,0.3))] hover:shadow-[0_0_30px_var(--glow-shadow-2,rgba(239,68,68,0.4))]'
             : 'border-white/10 bg-white/5 shadow-lg hover:border-indigo-400/50 hover:bg-white/10 hover:shadow-[0_0_30px_rgba(129,140,248,0.15)]'
         }`}
       >
