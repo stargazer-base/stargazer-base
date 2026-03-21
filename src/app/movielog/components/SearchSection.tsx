@@ -80,7 +80,10 @@ export default function SearchSection({
   return (
     <div className="mt-12 flex w-full max-w-5xl flex-col items-center justify-center">
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={(e) => {
+          e.stopPropagation();
+          setIsOpen(!isOpen);
+        }}
         className="flex items-center gap-2 rounded-full bg-white/10 px-8 py-3 text-white/70 shadow-[0_0_15px_rgba(255,255,255,0.1)] backdrop-blur-md transition-all duration-300 hover:scale-105 hover:bg-white/20 hover:text-white hover:shadow-[0_0_20px_rgba(255,255,255,0.2)]"
       >
         <FontAwesomeIcon icon={faMagnifyingGlass} className="text-lg" />
@@ -219,13 +222,21 @@ export default function SearchSection({
 
             <div className="mt-4 flex items-center justify-between border-t border-white/10 pt-4">
               <button
-                onClick={resetFilters}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  resetFilters();
+                }}
                 className="text-xs text-white/40 underline underline-offset-2 transition-colors hover:text-white/80"
               >
                 条件をクリア
               </button>
               <button
-                onClick={handleApply}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleApply();
+                }}
+                onMouseUp={(e) => e.stopPropagation()}
+                onPointerUp={(e) => e.stopPropagation()}
                 className="rounded-full bg-indigo-500/80 px-8 py-2.5 text-sm font-bold text-white shadow-[0_0_10px_rgba(99,102,241,0.4)] transition-colors hover:bg-indigo-500 hover:shadow-[0_0_15px_rgba(99,102,241,0.6)]"
               >
                 絞り込む

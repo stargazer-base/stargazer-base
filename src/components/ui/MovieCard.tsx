@@ -22,6 +22,7 @@ export default function MovieCard({
   isWatched?: boolean;
   onWatchChange?: (isWatched: boolean) => void;
 }) {
+  const [isPlaying, setIsPlaying] = useState(true);
   const [internalIsWatched, setInternalIsWatched] = useState(false);
 
   const watched = isWatched !== undefined ? isWatched : internalIsWatched;
@@ -49,8 +50,10 @@ export default function MovieCard({
       <div
         role="button"
         tabIndex={0}
-        onClick={handleCardClick}
-        onKeyDown={(e) => e.key === 'Enter'}
+        onClick={(e) => {
+          e.stopPropagation();
+          handleCardClick(e);
+        }}
         className={`group relative flex h-full w-full cursor-pointer flex-col items-start justify-start overflow-hidden rounded-2xl border p-4 text-left backdrop-blur-md transition-all duration-500 hover:-translate-y-1 ${
           watched
             ? 'border-red-500 bg-red-900/10 shadow-[0_0_20px_rgba(239,68,68,0.3)] hover:shadow-[0_0_30px_rgba(239,68,68,0.4)]'
@@ -65,14 +68,24 @@ export default function MovieCard({
           }}
         >
           {videoUrl ? (
-            <div className="absolute inset-0 h-full w-full">
+            <div
+              className="absolute inset-0 h-full w-full"
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
+            >
               <ReactPlayer
                 src={videoUrl}
                 width="100%"
                 height="100%"
                 controls={true} // 動画の操作ができる（ミュート、速度変更など）
                 light={true} // 軽量表示（クリックで再生できる）
-                playing={true} // 自動再生
+                playing={isPlaying}
+                onPlay={() => setIsPlaying(true)}
+                onPause={() => setIsPlaying(false)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
               />
             </div>
           ) : (
@@ -85,7 +98,10 @@ export default function MovieCard({
         {/* テキスト情報エリア（推し活特化） */}
         <div className="flex w-full flex-col gap-2">
           {/* ユーザ作成のタグリスト */}
-          <div className="flex flex-wrap gap-2">
+          <div
+            className="flex flex-wrap gap-2"
+            onClick={(e) => e.stopPropagation()}
+          >
             <span className="flex items-center rounded-full border border-indigo-500/30 bg-indigo-900/40 px-2.5 py-1">
               <Text variant="detail">#初配信</Text>
             </span>
