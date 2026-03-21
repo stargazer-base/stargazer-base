@@ -10,12 +10,12 @@ export default async function MovieLogPage() {
     .from('videos')
     .select('id, thumbnail_url, channel_id')
     .order('published_at', { ascending: false })
-    .limit(100);
+    .limit(300);
 
   // 推し（チャンネル）の取得
   const { data: channels } = await supabase
     .from('channels')
-    .select('id, name_jp')
+    .select('id, name_jp, color_code')
     .eq('is_deleted', false)
     .order('disp_order', { ascending: true });
 
@@ -24,6 +24,30 @@ export default async function MovieLogPage() {
     .from('tags')
     .select('id, name')
     .eq('is_deleted', false);
+
+  // ログインユーザ情報の取得
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  // ユーザの推し（oshis）情報の取得
+  let initialUserOshis: string[] = [];
+  let initialMostFav: string | null = null;
+  if (user) {
+    const { data: userOshis } = await supabase
+      .from('oshis')
+      .select('channel_id, most_fav')
+      .eq('user_id', user.id)
+      .eq('is_deleted', false);
+
+    if (userOshis) {
+      initialUserOshis = userOshis.map((o) => o.channel_id);
+      const fav = userOshis.find((o) => o.most_fav);
+      if (fav) {
+        initialMostFav = fav.channel_id;
+      }
+    }
+  }
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-start px-8 py-24">
@@ -40,6 +64,9 @@ export default async function MovieLogPage() {
         initialVideos={videos || []}
         oshis={channels || []}
         tags={tags || []}
+        initialUserOshis={initialUserOshis}
+        initialMostFav={initialMostFav}
+        userId={user?.id || null}
       />
     </main>
   );
