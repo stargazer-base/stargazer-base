@@ -63,7 +63,8 @@ export default function MovieLogClient({
 
   const handleUpdateOshis = async () => {
     if (!userId) {
-      alert('ログインが必要です');
+      setSavedOshis(registeredOshis);
+      alert('推しを更新しました！\n（※ゲストのため設定は保存されません。保存にはログインが必要です）');
       return;
     }
 
@@ -165,16 +166,14 @@ export default function MovieLogClient({
 
       {/* ボタンエリア（推し設定＆検索） */}
       <div className="mt-12 flex w-full max-w-5xl flex-row items-center justify-center gap-6">
-        {userId && (
-          <button
-            onClick={() => setIsOshiPanelOpen(!isOshiPanelOpen)}
-            disabled={isSearchOpen}
-            className={`flex items-center gap-2 rounded-full px-8 py-3 font-medium tracking-wider shadow-[0_0_15px_rgba(255,255,255,0.1)] backdrop-blur-md transition-all duration-300 ${isSearchOpen ? 'scale-100 cursor-not-allowed bg-white/5 text-white/30' : 'bg-white/10 text-white/70 hover:scale-105 hover:bg-white/20 hover:text-white hover:shadow-[0_0_20px_rgba(255,255,255,0.2)]'}`}
-          >
-            <FontAwesomeIcon icon={faHeart} size="xl" />
-            <span>推し設定</span>
-          </button>
-        )}
+        <button
+          onClick={() => setIsOshiPanelOpen(!isOshiPanelOpen)}
+          disabled={isSearchOpen}
+          className={`flex items-center gap-2 rounded-full px-8 py-3 font-medium tracking-wider shadow-[0_0_15px_rgba(255,255,255,0.1)] backdrop-blur-md transition-all duration-300 ${isSearchOpen ? 'scale-100 cursor-not-allowed bg-white/5 text-white/30' : 'bg-white/10 text-white/70 hover:scale-105 hover:bg-white/20 hover:text-white hover:shadow-[0_0_20px_rgba(255,255,255,0.2)]'}`}
+        >
+          <FontAwesomeIcon icon={faHeart} size="xl" />
+          <span>推し設定</span>
+        </button>
 
         <button
           onClick={() => setIsSearchOpen(!isSearchOpen)}
@@ -188,8 +187,7 @@ export default function MovieLogClient({
       </div>
 
       {/* 推し登録パネル */}
-      {userId && (
-        <div className="flex w-full max-w-5xl flex-col items-center justify-center">
+      <div className="flex w-full max-w-5xl flex-col items-center justify-center">
           <div
             className={`w-full max-w-2xl overflow-hidden transition-all duration-500 ease-in-out ${
               isOshiPanelOpen
@@ -254,7 +252,6 @@ export default function MovieLogClient({
             </div>
           </div>
         </div>
-      )}
 
       {/* 検索エリアパネル */}
       <SearchSection
