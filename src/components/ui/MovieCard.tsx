@@ -3,6 +3,8 @@
 import dynamic from 'next/dynamic';
 import { useState } from 'react';
 import { Text } from '@/components/ui/Text';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPen, faCheck } from '@fortawesome/free-solid-svg-icons';
 
 // Hydration errorを防ぐためにクライアントサイドでのみロードする
 const ReactPlayer = dynamic(() => import('react-player'), {
@@ -16,16 +18,26 @@ type VideoProps = {
 export default function MovieCard({
   video,
   isWatched,
+  comment,
   onWatchChange,
+  onCommentSave,
   glowColor,
 }: {
   video?: VideoProps;
   isWatched?: boolean;
+  comment?: string;
   onWatchChange?: (isWatched: boolean) => void;
+  onCommentSave?: (comment: string) => void;
   glowColor?: string | null;
 }) {
   const [isPlaying, setIsPlaying] = useState(true);
   const [internalIsWatched, setInternalIsWatched] = useState(false);
+  const [isEditingComment, setIsEditingComment] = useState(false);
+  const [commentInput, setCommentInput] = useState('');
+
+  const isValidComment = commentInput.length <= 64 && 
+    !commentInput.toLowerCase().includes('<script') && 
+    !commentInput.toLowerCase().includes('javascript:');
 
   const watched = isWatched !== undefined ? isWatched : internalIsWatched;
 
@@ -123,10 +135,67 @@ export default function MovieCard({
             </span>
           </div>
 
-          {/* ユーザのコメント（推奨60文字前後、省略なしで全表示） */}
-          <Text variant="body" className="mt-1 leading-relaxed">
-            自分用一言コメントを60文字くらいでここに記載できます。Coming soon...
-          </Text>
+          {/* ユーザのコメント */}
+          <div className="relative mt-1 flex w-full flex-col">
+            {onCommentSave && (
+              <div className="absolute -top-1 right-0 z-20">
+                {isEditingComment ? (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (isValidComment) {
+                        onCommentSave(commentInput);
+                        setIsEditingComment(false);
+                      }
+                    }}
+                    disabled={!isValidComment}
+                    className={`flex h-6 w-6 items-center justify-center rounded-full transition-all ${
+                      isValidComment
+                        ? 'bg-emerald-500/80 text-white shadow-[0_0_10px_rgba(16,185,129,0.5)] hover:bg-emerald-500 hover:scale-110'
+                        : 'bg-gray-500/50 text-white/50 cursor-not-allowed'
+                    }`}
+                  >
+                    <FontAwesomeIcon icon={faCheck} size="xs" />
+                  </button>
+                ) : (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setCommentInput(comment || '');
+                      setIsEditingComment(true);
+                    }}
+                    className="flex h-6 w-6 items-center justify-center rounded-full bg-black/40 text-white/70 backdrop-blur-md transition-all hover:bg-black/60 hover:text-white hover:scale-110"
+                  >
+                    <FontAwesomeIcon icon={faPen} size="xs" />
+                  </button>
+                )}
+              </div>
+            )}
+            
+            {isEditingComment ? (
+              <div className="w-full pr-8" onClick={(e) => e.stopPropagation()}>
+                <input
+                  type="text"
+                  value={commentInput}
+                  onChange={(e) => setCommentInput(e.target.value)}
+                  placeholder="一言コメントを入力（64文字まで）"
+                  className={`w-full rounded border bg-black/50 px-3 py-1.5 text-sm text-white placeholder-white/40 outline-none transition-colors ${
+                    !isValidComment ? 'border-red-500 focus:border-red-500' : 'border-white/20 focus:border-indigo-400'
+                  }`}
+                />
+                {!isValidComment && commentInput.length > 64 && (
+                  <span className="mt-1 block text-xs text-red-400">64文字以内で入力してください</span>
+                )}
+                {!isValidComment && commentInput.length <= 64 && (
+                  <span className="mt-1 block text-xs text-red-400">不正な入力が含まれています</span>
+                )}
+              </div>
+            ) : (
+              <Text variant="body" className={`min-h-[24px] pr-8 leading-relaxed ${!comment ? 'text-white/40' : 'text-white/80'}`}>
+                {comment || '自分用一言コメントをここに記載できます。'}
+              </Text>
+            )}
+          </div>
         </div>
       </div>
     </div>

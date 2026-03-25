@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase/server';
 import { Text } from '@/components/ui/Text';
 import MovieLogClient from './components/MovieLogClient';
 
+import { VideoLog } from './hooks/useVideoLog';
+
 export default async function MovieLogPage() {
   const supabase = createClient();
 
@@ -49,16 +51,15 @@ export default async function MovieLogPage() {
     }
   }
 
-  let initialWatchedVideoIds: string[] = [];
+  let initialVideoLogs: VideoLog[] = [];
   if (user) {
     const { data: videologs } = await supabase
       .from('video_logs')
-      .select('youtube_video_id')
-      .eq('user_id', user.id)
-      .eq('is_watched', true);
+      .select('youtube_video_id, is_watched, comment')
+      .eq('user_id', user.id);
 
     if (videologs) {
-      initialWatchedVideoIds = videologs.map((log) => log.youtube_video_id);
+      initialVideoLogs = videologs as VideoLog[];
     }
   }
 
@@ -79,7 +80,7 @@ export default async function MovieLogPage() {
         tags={tags || []}
         initialUserOshis={initialUserOshis}
         initialMostFav={initialMostFav}
-        initialWatchedVideoIds={initialWatchedVideoIds}
+        initialVideoLogs={initialVideoLogs}
         userId={user?.id || null}
       />
     </main>

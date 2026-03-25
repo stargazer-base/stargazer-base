@@ -8,7 +8,7 @@ import { createClient } from '@/lib/supabase/client';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHeart } from '@fortawesome/free-regular-svg-icons';
 import { faMagnifyingGlass, faCrown } from '@fortawesome/free-solid-svg-icons';
-import { useWatchStatus } from '../hooks/useWatchStatus';
+import { VideoLog, useVideoLog } from '../hooks/useVideoLog';
 
 interface Video {
   id: string;
@@ -22,7 +22,7 @@ interface MovieLogClientProps {
   tags: { id: string; name: string }[];
   initialUserOshis: string[];
   initialMostFav: string | null;
-  initialWatchedVideoIds: string[];
+  initialVideoLogs: VideoLog[];
   userId: string | null;
 }
 
@@ -32,13 +32,14 @@ export default function MovieLogClient({
   tags,
   initialUserOshis,
   initialMostFav,
-  initialWatchedVideoIds,
+  initialVideoLogs,
   userId,
 }: MovieLogClientProps) {
   const [appliedFilters, setAppliedFilters] = useState<FilterState | null>(
     null
   );
-  const { watchedVideoIds, toggleWatchStatus } = useWatchStatus(initialWatchedVideoIds, userId);
+  
+  const { logs, toggleWatchStatus, updateComment } = useVideoLog(initialVideoLogs, userId);
 
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isOshiPanelOpen, setIsOshiPanelOpen] = useState(false);
@@ -137,19 +138,28 @@ export default function MovieLogClient({
       }
 
       // 視聴済みフィルター
+      const isWatched = logs[video.id]?.is_watched || false;
       if (appliedFilters.watchedFilter === 'watched') {
-        if (!watchedVideoIds.has(video.id)) return false;
+        if (!isWatched) return false;
       } else if (appliedFilters.watchedFilter === 'not_watched') {
-        if (watchedVideoIds.has(video.id)) return false;
+        if (isWatched) return false;
+      }
+
+      // キーワードフィルター (コメントの部分一致検索)
+      if (appliedFilters.keyword) {
+        const comment = logs[video.id]?.comment || '';
+        if (!comment.toLowerCase().includes(appliedFilters.keyword.toLowerCase())) {
+          return false;
+        }
       }
 
       return true;
     });
-  }, [initialVideos, appliedFilters, savedOshis, watchedVideoIds]);
+  }, [initialVideos, appliedFilters, savedOshis, logs]);
 
   const dyedCount = useMemo(() => {
-    return filteredVideos.filter((v) => watchedVideoIds.has(v.id)).length;
-  }, [filteredVideos, watchedVideoIds]);
+    return filteredVideos.filter((v) => logs[v.id]?.is_watched).length;
+  }, [filteredVideos, logs]);
 
   return (
     <>
@@ -270,8 +280,10 @@ export default function MovieLogClient({
             <MovieCard
               key={video.id}
               video={video as { id: string }}
-              isWatched={watchedVideoIds.has(video.id)}
+              isWatched={logs[video.id]?.is_watched || false}
+              comment={logs[video.id]?.comment || ''}
               onWatchChange={(isWatched) => toggleWatchStatus(video.id, isWatched)}
+              onCommentSave={(comment) => updateComment(video.id, comment)}
               glowColor={mostFavColor}
             />
           ))}
