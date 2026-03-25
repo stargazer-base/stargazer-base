@@ -49,6 +49,19 @@ export default async function MovieLogPage() {
     }
   }
 
+  let initialWatchedVideoIds: string[] = [];
+  if (user) {
+    const { data: videologs } = await supabase
+      .from('video_logs')
+      .select('youtube_video_id')
+      .eq('user_id', user.id)
+      .eq('is_watched', true);
+
+    if (videologs) {
+      initialWatchedVideoIds = videologs.map((log) => log.youtube_video_id);
+    }
+  }
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-start px-8 py-24">
       {/* タイトルとサブタイトル */}
@@ -66,6 +79,7 @@ export default async function MovieLogPage() {
         tags={tags || []}
         initialUserOshis={initialUserOshis}
         initialMostFav={initialMostFav}
+        initialWatchedVideoIds={initialWatchedVideoIds}
         userId={user?.id || null}
       />
     </main>

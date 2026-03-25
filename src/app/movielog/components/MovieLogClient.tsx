@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase/client';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHeart } from '@fortawesome/free-regular-svg-icons';
 import { faMagnifyingGlass, faCrown } from '@fortawesome/free-solid-svg-icons';
+import { useWatchStatus } from '../hooks/useWatchStatus';
 
 interface Video {
   id: string;
@@ -21,6 +22,7 @@ interface MovieLogClientProps {
   tags: { id: string; name: string }[];
   initialUserOshis: string[];
   initialMostFav: string | null;
+  initialWatchedVideoIds: string[];
   userId: string | null;
 }
 
@@ -30,14 +32,13 @@ export default function MovieLogClient({
   tags,
   initialUserOshis,
   initialMostFav,
+  initialWatchedVideoIds,
   userId,
 }: MovieLogClientProps) {
   const [appliedFilters, setAppliedFilters] = useState<FilterState | null>(
     null
   );
-  const [watchedVideoIds, setWatchedVideoIds] = useState<Set<string>>(
-    new Set()
-  );
+  const { watchedVideoIds, toggleWatchStatus } = useWatchStatus(initialWatchedVideoIds, userId);
 
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isOshiPanelOpen, setIsOshiPanelOpen] = useState(false);
@@ -105,17 +106,7 @@ export default function MovieLogClient({
     }
   };
 
-  const handleWatchChange = (id: string, isWatched: boolean) => {
-    setWatchedVideoIds((prev) => {
-      const next = new Set(prev);
-      if (isWatched) {
-        next.add(id);
-      } else {
-        next.delete(id);
-      }
-      return next;
-    });
-  };
+
 
   const filteredVideos = useMemo(() => {
     if (!appliedFilters) {
@@ -272,9 +263,7 @@ export default function MovieLogClient({
               key={video.id}
               video={video as { id: string }}
               isWatched={watchedVideoIds.has(video.id)}
-              onWatchChange={(isWatched) =>
-                handleWatchChange(video.id, isWatched)
-              }
+              onWatchChange={(isWatched) => toggleWatchStatus(video.id, isWatched)}
               glowColor={mostFavColor}
             />
           ))}
