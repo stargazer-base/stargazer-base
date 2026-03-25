@@ -11,7 +11,7 @@ describe('MovieCard コンポーネント', () => {
     const tag2 = screen.getByText('#歌枠');
 
     // コメントの一部分を取得
-    const comment = screen.getByText(/Coming soon/i);
+    const comment = screen.getByText(/自分用一言コメントをここに記載できます/i);
 
     // すべて想定通り表示されているか確認
     expect(tag1).toBeInTheDocument();
