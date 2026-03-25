@@ -135,9 +135,17 @@ export default function MovieLogClient({
           return false;
         }
       }
+
+      // 視聴済みフィルター
+      if (appliedFilters.watchedFilter === 'watched') {
+        if (!watchedVideoIds.has(video.id)) return false;
+      } else if (appliedFilters.watchedFilter === 'not_watched') {
+        if (watchedVideoIds.has(video.id)) return false;
+      }
+
       return true;
     });
-  }, [initialVideos, appliedFilters, savedOshis]);
+  }, [initialVideos, appliedFilters, savedOshis, watchedVideoIds]);
 
   const dyedCount = useMemo(() => {
     return filteredVideos.filter((v) => watchedVideoIds.has(v.id)).length;
