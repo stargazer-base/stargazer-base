@@ -9,11 +9,13 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHeart } from '@fortawesome/free-regular-svg-icons';
 import { faMagnifyingGlass, faCrown } from '@fortawesome/free-solid-svg-icons';
 import { VideoLog, useVideoLog } from '../hooks/useVideoLog';
+import { useVideoTags } from '../hooks/useVideoTags';
 
 interface Video {
   id: string;
   thumbnail_url: string | null;
   channel_id: string;
+  title: string;
 }
 
 interface MovieLogClientProps {
@@ -23,6 +25,7 @@ interface MovieLogClientProps {
   initialUserOshis: string[];
   initialMostFav: string | null;
   initialVideoLogs: VideoLog[];
+  initialVideoTags: { youtube_video_id: string; tag_id: string }[];
   userId: string | null;
 }
 
@@ -33,13 +36,22 @@ export default function MovieLogClient({
   initialUserOshis,
   initialMostFav,
   initialVideoLogs,
+  initialVideoTags,
   userId,
 }: MovieLogClientProps) {
   const [appliedFilters, setAppliedFilters] = useState<FilterState | null>(
     null
   );
-  
-  const { logs, toggleWatchStatus, updateComment } = useVideoLog(initialVideoLogs, userId);
+
+  const { logs, toggleWatchStatus, updateComment, toggleFavoriteStatus } = useVideoLog(
+    initialVideoLogs,
+    userId
+  );
+  const { userTags, videoTagsMap, updateVideoTags } = useVideoTags(
+    tags,
+    initialVideoTags,
+    userId
+  );
 
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isOshiPanelOpen, setIsOshiPanelOpen] = useState(false);
@@ -78,9 +90,19 @@ export default function MovieLogClient({
         const isMostFav = mostFavOshi === oshi.id;
 
         if (isSelected) {
-          return { user_id: userId, channel_id: oshi.id, is_deleted: false, most_fav: isMostFav };
+          return {
+            user_id: userId,
+            channel_id: oshi.id,
+            is_deleted: false,
+            most_fav: isMostFav,
+          };
         } else if (wasSelected) {
-          return { user_id: userId, channel_id: oshi.id, is_deleted: true, most_fav: false };
+          return {
+            user_id: userId,
+            channel_id: oshi.id,
+            is_deleted: true,
+            most_fav: false,
+          };
         }
         return null;
       })
@@ -106,8 +128,6 @@ export default function MovieLogClient({
       alert('変更がありません。');
     }
   };
-
-
 
   const filteredVideos = useMemo(() => {
     if (!appliedFilters) {
@@ -145,21 +165,53 @@ export default function MovieLogClient({
         if (isWatched) return false;
       }
 
-      // キーワードフィルター (コメントの部分一致検索)
+      // お気に入りフィルター
+      const isFavorite = logs[video.id]?.is_favorite || false;
+      if (appliedFilters.favoriteFilter === 'favorite') {
+        if (!isFavorite) return false;
+      } else if (appliedFilters.favoriteFilter === 'not_favorite') {
+        if (isFavorite) return false;
+      }
+
+      // タグフィルター (AND検索)
+      if (
+        appliedFilters.selectedTags &&
+        appliedFilters.selectedTags.length > 0
+      ) {
+        const videoTagIds = videoTagsMap[video.id] || [];
+        const hasAllTags = appliedFilters.selectedTags.every((t) =>
+          videoTagIds.includes(t)
+        );
+        if (!hasAllTags) return false;
+      }
+
+      // キーワードフィルター (タイトル、コメントの部分一致検索・複数キーワード 半角スペース区切りAND検索)
       if (appliedFilters.keyword) {
-        const comment = logs[video.id]?.comment || '';
-        if (!comment.toLowerCase().includes(appliedFilters.keyword.toLowerCase())) {
-          return false;
+        const keywords = appliedFilters.keyword
+          .toLowerCase()
+          .split(' ')
+          .filter((k) => k.trim() !== '');
+        if (keywords.length > 0) {
+          const title = video.title ? video.title.toLowerCase() : '';
+          const comment = (logs[video.id]?.comment || '').toLowerCase();
+
+          const targetText = `${title} ${comment}`;
+
+          const isMatch = keywords.every((kw) => targetText.includes(kw));
+          if (!isMatch) {
+            return false;
+          }
         }
       }
 
       return true;
     });
-  }, [initialVideos, appliedFilters, savedOshis, logs]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialVideos, appliedFilters, savedOshis]);
 
   const dyedCount = useMemo(() => {
-    return filteredVideos.filter((v) => logs[v.id]?.is_watched).length;
-  }, [filteredVideos, logs]);
+    return initialVideos.filter((v) => logs[v.id]?.is_watched).length;
+  }, [initialVideos, logs]);
 
   return (
     <>
@@ -167,8 +219,8 @@ export default function MovieLogClient({
       <div className="mt-6 flex w-full max-w-5xl flex-col items-center justify-center gap-4">
         <Text variant="subTitle">
           推しへの染まり度 ♡{' '}
-          {Math.round((dyedCount / filteredVideos.length) * 100) || 0}% (
-          {dyedCount} / {filteredVideos.length})
+          {initialVideos.length > 0 ? Math.round((dyedCount / initialVideos.length) * 100) : 0}% (
+          {dyedCount} / {initialVideos.length})
         </Text>
       </div>
 
@@ -202,13 +254,13 @@ export default function MovieLogClient({
           <div
             className={`w-full max-w-2xl overflow-hidden transition-all duration-500 ease-in-out ${
               isOshiPanelOpen
-                ? 'mt-6 max-h-[500px] opacity-100'
+                ? 'mt-6 max-h-[1000px] opacity-100'
                 : 'max-h-0 opacity-0'
             }`}
           >
             <div className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-xl backdrop-blur-lg">
               <span className="mb-4 block text-[10px] font-normal uppercase tracking-wider text-indigo-200">
-                自分の推しを選択
+                自分の推しを選択（敬称略）
               </span>
               <div className="flex flex-wrap gap-2">
                 {oshis.map((oshi) => (
@@ -236,19 +288,27 @@ export default function MovieLogClient({
                     .map((oshi) => (
                       <button
                         key={`fav-${oshi.id}`}
-                        onClick={() => setMostFavOshi(mostFavOshi === oshi.id ? null : oshi.id)}
+                        onClick={() =>
+                          setMostFavOshi(
+                            mostFavOshi === oshi.id ? null : oshi.id
+                          )
+                        }
                         className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-all ${
                           mostFavOshi === oshi.id
                             ? 'border-amber-400 bg-amber-500/30 text-amber-100 shadow-[0_0_10px_rgba(251,191,36,0.3)]'
                             : 'border-white/10 bg-black/20 text-white/50 hover:border-white/30 hover:text-white/80'
                         }`}
                       >
-                        {mostFavOshi === oshi.id && <FontAwesomeIcon icon={faCrown} />}
+                        {mostFavOshi === oshi.id && (
+                          <FontAwesomeIcon icon={faCrown} />
+                        )}
                         {oshi.name_jp}
                       </button>
                     ))
                 ) : (
-                  <span className="text-xs text-white/40">先に上のリストから推しを選択してください</span>
+                  <span className="text-xs text-white/40">
+                    先に上のリストから推しを選択してください
+                  </span>
                 )}
               </div>
 
@@ -267,7 +327,7 @@ export default function MovieLogClient({
 
       {/* 検索エリアパネル */}
       <SearchSection
-        oshis={oshis}
+        oshis={oshis.filter((o) => savedOshis.includes(o.id))}
         tags={tags}
         onApply={setAppliedFilters}
         isOpen={isSearchOpen}
@@ -279,11 +339,32 @@ export default function MovieLogClient({
           {filteredVideos.map((video) => (
             <MovieCard
               key={video.id}
-              video={video as { id: string }}
+              video={{
+                id: video.id,
+                title: video.title,
+                channelName:
+                  oshis.find((o) => o.id === video.channel_id)?.name_jp ||
+                  'Unknown',
+              }}
               isWatched={logs[video.id]?.is_watched || false}
               comment={logs[video.id]?.comment || ''}
-              onWatchChange={(isWatched) => toggleWatchStatus(video.id, isWatched)}
+              isFavorite={logs[video.id]?.is_favorite || false}
+              videoTags={
+                videoTagsMap[video.id]
+                  ? userTags.filter((t) =>
+                      videoTagsMap[video.id]?.includes(t.id)
+                    )
+                  : []
+              }
+              userTags={userTags}
+              onWatchChange={(isWatched) =>
+                toggleWatchStatus(video.id, isWatched)
+              }
               onCommentSave={(comment) => updateComment(video.id, comment)}
+              onTagsSave={(selectedTagIds: string[], newTagNames: string[]) =>
+                updateVideoTags(video.id, selectedTagIds, newTagNames)
+              }
+              onFavoriteToggle={(isFavorite) => toggleFavoriteStatus(video.id, isFavorite)}
               glowColor={mostFavColor}
             />
           ))}

@@ -52,7 +52,7 @@ const styles: Record<TextVariant, string> = {
   heading: 'text-2xl font-semibold text-indigo-100',
   subHeading: 'text-base font-bold text-indigo-300',
   body: 'text-sm font-normal text-indigo-50 leading-relaxed',
-  detail: 'text-[10px] font-normal text-indigo-200 uppercase tracking-wider',
+  detail: 'text-[10px] font-normal text-indigo-200 tracking-wider',
 };
 
 /**
