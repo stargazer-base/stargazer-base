@@ -100,7 +100,7 @@ export default async function Home() {
               こんにちは、{user.user_metadata.name || 'ゲスト'}
               さん！
               <br />
-              推しに染まるアプリをクリックして、推しの動画の視聴ログを作成しましょう！
+              推し色に染まるアプリをクリックして、推しの動画の視聴ログを作成しましょう！
             </Text>
             <LogoutButton />
           </div>
