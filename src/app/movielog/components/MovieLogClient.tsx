@@ -86,35 +86,26 @@ export default function MovieLogClient({
 
     const supabase = createClient();
 
-    const upsertData = oshis
-      .map((oshi) => {
-        const isSelected = registeredOshis.includes(oshi.id);
-        const wasSelected = savedOshis.includes(oshi.id);
-        const isMostFav = mostFavOshi === oshi.id;
+    const upsertData: { user_id: string; channel_id: string; most_fav: boolean }[] = [];
+    const deleteIds: string[] = [];
 
-        if (isSelected) {
-          return {
-            user_id: userId,
-            channel_id: oshi.id,
-            is_deleted: false,
-            most_fav: isMostFav,
-          };
-        } else if (wasSelected) {
-          return {
-            user_id: userId,
-            channel_id: oshi.id,
-            is_deleted: true,
-            most_fav: false,
-          };
-        }
-        return null;
-      })
-      .filter(Boolean) as {
-      user_id: string;
-      channel_id: string;
-      is_deleted: boolean;
-      most_fav: boolean;
-    }[];
+    oshis.forEach((oshi) => {
+      const isSelected = registeredOshis.includes(oshi.id);
+      const wasSelected = savedOshis.includes(oshi.id);
+      const isMostFav = mostFavOshi === oshi.id;
+
+      if (isSelected) {
+        upsertData.push({
+          user_id: userId,
+          channel_id: oshi.id,
+          most_fav: isMostFav,
+        });
+      } else if (wasSelected) {
+        deleteIds.push(oshi.id);
+      }
+    });
+
+    let hasError = false;
 
     if (upsertData.length > 0) {
       const { error } = await supabase
@@ -122,11 +113,27 @@ export default function MovieLogClient({
         .upsert(upsertData, { onConflict: 'user_id, channel_id' });
       if (error) {
         console.error('Failed to update oshis:', error);
-        alert('推しの更新に失敗しました。');
-      } else {
-        setSavedOshis(registeredOshis);
-        alert('推しを更新しました！');
+        hasError = true;
       }
+    }
+
+    if (deleteIds.length > 0) {
+      const { error } = await supabase
+        .from('oshis')
+        .delete()
+        .eq('user_id', userId)
+        .in('channel_id', deleteIds);
+      if (error) {
+        console.error('Failed to delete oshis:', error);
+        hasError = true;
+      }
+    }
+
+    if (hasError) {
+      alert('推しの更新に失敗しました。');
+    } else if (upsertData.length > 0 || deleteIds.length > 0) {
+      setSavedOshis(registeredOshis);
+      alert('推しを更新しました！');
     } else {
       alert('変更がありません。');
     }

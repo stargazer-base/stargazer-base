@@ -23,14 +23,12 @@ export default async function MovieLogPage() {
   const { data: channels } = await supabase
     .from('channels')
     .select('id, name_jp, color_code')
-    .eq('is_deleted', false)
     .order('disp_order', { ascending: true });
 
   // タグの取得
   const { data: tags } = await supabase
     .from('tags')
-    .select('id, name')
-    .eq('is_deleted', false);
+    .select('id, name');
 
   // ログインユーザ情報の取得
   const {
@@ -44,8 +42,7 @@ export default async function MovieLogPage() {
     const { data: userOshis } = await supabase
       .from('oshis')
       .select('channel_id, most_fav')
-      .eq('user_id', user.id)
-      .eq('is_deleted', false);
+      .eq('user_id', user.id);
 
     if (userOshis) {
       initialUserOshis = userOshis.map((o) => o.channel_id);
@@ -92,8 +89,7 @@ export default async function MovieLogPage() {
     const { data: videotags } = await supabase
       .from('video_tags')
       .select('youtube_video_id, tag_id')
-      .eq('user_id', user.id)
-      .eq('is_deleted', false);
+      .eq('user_id', user.id);
 
     if (videotags) {
       initialVideoTags = videotags as VideoTag[];
