@@ -58,7 +58,24 @@ export default async function MovieLogPage() {
   // 動画の取得
   let videos: VideoData[] = [];
   let totalVideoCount = 0;
-  if (initialUserOshis.length > 0) {
+  
+  if (isGuest || !user) {
+    // ゲストの場合は全動画から最新50件を取得
+    const { count } = await supabase
+      .from('videos')
+      .select('id', { count: 'exact', head: true });
+    totalVideoCount = count || 0;
+
+    const { data } = await supabase
+      .from('videos')
+      .select('id, thumbnail_url, channel_id, title')
+      .order('published_at', { ascending: false })
+      .limit(50);
+    if (data) {
+      videos = data;
+    }
+  } else if (initialUserOshis.length > 0) {
+    // ログインユーザの場合で、推しが設定されている場合
     const { count } = await supabase
       .from('videos')
       .select('id', { count: 'exact', head: true })

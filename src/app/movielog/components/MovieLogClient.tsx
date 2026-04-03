@@ -148,6 +148,7 @@ export default function MovieLogClient({
           savedOshis.includes(video.channel_id)
         );
       }
+      if (!userId) return initialVideos;
       return [];
     }
 
@@ -164,7 +165,7 @@ export default function MovieLogClient({
           if (!savedOshis.includes(video.channel_id)) {
             return false;
           }
-        } else {
+        } else if (userId) {
           return false;
         }
       }
