@@ -1,8 +1,17 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Text } from '@/components/ui/Text';
+import { createClient } from '@/lib/supabase/server';
+import GoogleLoginButton from '@/components/ui/GoogleLoginButton';
+import GuestLoginButton from '@/components/ui/GuestLoginButton';
+import LogoutButton from '@/components/ui/LogoutButton';
 
-export default function Home() {
+export default async function Home() {
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   return (
     <main className="flex flex-col items-center justify-center px-8 py-24 text-center">
       {/* タイトルとサブタイトル */}
@@ -81,6 +90,31 @@ export default function Home() {
             </div>
           </li>
         </ul>
+      </div>
+
+      {/* ログイン・メッセージエリア */}
+      <div className="mt-16 flex w-full max-w-5xl flex-col items-center justify-center space-y-4 rounded-2xl border border-white/10 bg-white/5 p-8 backdrop-blur-md">
+        {user ? (
+          <div className="flex flex-col items-center justify-center gap-6">
+            <Text variant="body" className="text-center text-indigo-100">
+              こんにちは、{user.user_metadata.name || 'ゲスト'}
+              さん！
+              <br />
+              推しに染まるアプリをクリックして、推しの動画の視聴ログを作成しましょう！
+            </Text>
+            <LogoutButton />
+          </div>
+        ) : (
+          <>
+            <Text variant="body" className="mb-2 text-center text-indigo-100">
+              ログインするとデータを保存できます。
+            </Text>
+            <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
+              <GoogleLoginButton />
+              <GuestLoginButton redirectTo="" />
+            </div>
+          </>
+        )}
       </div>
     </main>
   );

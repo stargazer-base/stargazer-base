@@ -38,7 +38,9 @@ export default async function MovieLogPage() {
   // ユーザの推し（oshis）情報の取得
   let initialUserOshis: string[] = [];
   let initialMostFav: string | null = null;
-  if (user) {
+  const isGuest = (user as any)?.is_anonymous || false;
+  
+  if (user && !isGuest) {
     const { data: userOshis } = await supabase
       .from('oshis')
       .select('channel_id, most_fav')
@@ -76,7 +78,7 @@ export default async function MovieLogPage() {
 
   let initialVideoLogs: VideoLog[] = [];
   let initialVideoTags: VideoTag[] = [];
-  if (user) {
+  if (user && !isGuest) {
     const { data: videologs } = await supabase
       .from('video_logs')
       .select('youtube_video_id, is_watched, comment, is_favorite')
@@ -116,7 +118,7 @@ export default async function MovieLogPage() {
         initialMostFav={initialMostFav}
         initialVideoLogs={initialVideoLogs}
         initialVideoTags={initialVideoTags}
-        userId={user?.id || null}
+        userId={(!isGuest && user) ? user.id : null}
       />
     </main>
   );

@@ -4,7 +4,13 @@ import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 
-export default function GuestLoginButton() {
+interface GuestLoginButtonProps {
+  redirectTo?: string;
+}
+
+export default function GuestLoginButton({
+  redirectTo = '/movielog',
+}: GuestLoginButtonProps = {}) {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const supabase = createClient();
@@ -25,8 +31,11 @@ export default function GuestLoginButton() {
 
     console.log('ログイン成功！ユーザー情報:', data.user);
 
-    // 成功したら、動画一覧ページ（例: /dashboard）へ遷移させます
-    router.push('/movielog');
+    // 成功したら、指定されたURL（またはデフォルトの動画一覧ページ）へ遷移させます
+    // redirectToが空文字などの場合は遷移せず、リフレッシュのみ行います
+    if (redirectTo) {
+      router.push(redirectTo);
+    }
     router.refresh(); // サーバーコンポーネントのデータを最新化
   };
 
