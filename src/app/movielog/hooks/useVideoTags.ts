@@ -40,7 +40,6 @@ export function useVideoTags(
         const tagsToInsert = newTagNames.map((name) => ({
           user_id: userId,
           name: name,
-          is_deleted: false,
         }));
         
         // Upsert tags on user_id and name
@@ -85,7 +84,6 @@ export function useVideoTags(
                 user_id: userId,
                 youtube_video_id: videoId,
                 tag_id: tagId,
-                is_deleted: false,
               })),
               { onConflict: 'user_id, youtube_video_id, tag_id' }
             )
@@ -98,7 +96,7 @@ export function useVideoTags(
         ops.push(
           supabase
             .from('video_tags')
-            .update({ is_deleted: true })
+            .delete()
             .in('tag_id', tagsToRemove)
             .eq('youtube_video_id', videoId)
             .eq('user_id', userId)

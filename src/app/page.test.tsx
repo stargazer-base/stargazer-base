@@ -23,10 +23,24 @@ vi.mock('@/lib/supabase/client', () => ({
   }),
 }));
 
+// next/headers のモック（偽装）を追加
+vi.mock('next/headers', () => {
+  return {
+    cookies: () => ({
+      get: vi.fn(),
+      getAll: vi.fn().mockReturnValue([]),
+      set: vi.fn(),
+      delete: vi.fn(),
+    }),
+    headers: () => new Headers(),
+  };
+});
+
 describe('メイン画面', () => {
-  it('タイトルの見出しがh1（見出しレベル1）で正しく表示されること', () => {
+  it('タイトルの見出しがh1（見出しレベル1）で正しく表示されること', async () => {
     // 画面を描画
-    render(<Home />);
+    const Component = await Home();
+    render(Component);
 
     // タイトルを取得
     const title = screen.getByRole('heading', {
@@ -38,9 +52,10 @@ describe('メイン画面', () => {
     expect(title).toBeInTheDocument();
   });
 
-  it('説明文が正しく表示されること', () => {
+  it('説明文が正しく表示されること', async () => {
     // 画面を描画
-    render(<Home />);
+    const Component = await Home();
+    render(Component);
 
     // 説明文を取得
     const description = screen.getByText(
@@ -51,9 +66,10 @@ describe('メイン画面', () => {
     expect(description).toBeInTheDocument();
   });
 
-  it('リンクが正しく表示されること：推し色に染まる', () => {
+  it('リンクが正しく表示されること：推し色に染まる', async () => {
     // 画面を描画
-    render(<Home />);
+    const Component = await Home();
+    render(Component);
 
     // リンクを取得（Linkの中に複数のテキストが含まれるため、正規表現で部分一致させます）
     const link = screen.getByRole('link', {
@@ -65,8 +81,10 @@ describe('メイン画面', () => {
     expect(link).toHaveAttribute('href', '/movielog');
   });
 
-  it('アプリケーション名の見出しがh2（見出しレベル2）で正しく表示されること：推し色に染まる', () => {
-    render(<Home />);
+  it('アプリケーション名の見出しがh2（見出しレベル2）で正しく表示されること：推し色に染まる', async () => {
+    // 画面を描画
+    const Component = await Home();
+    render(Component);
 
     const heading = screen.getByRole('heading', {
       name: '推し色に染まる',
@@ -76,8 +94,10 @@ describe('メイン画面', () => {
     expect(heading).toBeInTheDocument();
   });
 
-  it('アプリのイメージ画像が正しく表示されること：推し色に染まる', () => {
-    render(<Home />);
+  it('アプリのイメージ画像が正しく表示されること：推し色に染まる', async () => {
+    // 画面を描画
+    const Component = await Home();
+    render(Component);
 
     const image = screen.getByRole('img', {
       name: '推し色に染まる アプリのイメージ画像',
@@ -86,8 +106,10 @@ describe('メイン画面', () => {
     expect(image).toBeInTheDocument();
   });
 
-  it('機能説明が正しく表示されること：推し色に染まる', () => {
-    render(<Home />);
+  it('機能説明が正しく表示されること：推し色に染まる', async () => {
+    // 画面を描画
+    const Component = await Home();
+    render(Component);
 
     // テキストを取得
     const introText = screen.getByText('YouTube動画視聴ログ管理アプリ');

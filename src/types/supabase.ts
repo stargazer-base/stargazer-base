@@ -22,7 +22,6 @@ export type Database = {
           group_name: string | null;
           group_name_jp: string | null;
           id: string;
-          is_deleted: boolean;
           is_initial_sync_done: boolean;
           name: string;
           name_jp: string;
@@ -37,7 +36,6 @@ export type Database = {
           group_name?: string | null;
           group_name_jp?: string | null;
           id?: string;
-          is_deleted?: boolean;
           is_initial_sync_done?: boolean;
           name: string;
           name_jp: string;
@@ -52,7 +50,6 @@ export type Database = {
           group_name?: string | null;
           group_name_jp?: string | null;
           id?: string;
-          is_deleted?: boolean;
           is_initial_sync_done?: boolean;
           name?: string;
           name_jp?: string;
@@ -67,7 +64,6 @@ export type Database = {
           channel_id: string;
           created_at: string;
           id: string;
-          is_deleted: boolean;
           most_fav: boolean;
           updated_at: string;
           user_id: string;
@@ -76,7 +72,6 @@ export type Database = {
           channel_id: string;
           created_at?: string;
           id?: string;
-          is_deleted?: boolean;
           most_fav?: boolean;
           updated_at?: string;
           user_id: string;
@@ -85,7 +80,6 @@ export type Database = {
           channel_id?: string;
           created_at?: string;
           id?: string;
-          is_deleted?: boolean;
           most_fav?: boolean;
           updated_at?: string;
           user_id?: string;
@@ -104,7 +98,6 @@ export type Database = {
         Row: {
           created_at: string;
           id: string;
-          is_deleted: boolean;
           name: string;
           updated_at: string;
           user_id: string;
@@ -112,7 +105,6 @@ export type Database = {
         Insert: {
           created_at?: string;
           id?: string;
-          is_deleted?: boolean;
           name: string;
           updated_at?: string;
           user_id: string;
@@ -120,7 +112,6 @@ export type Database = {
         Update: {
           created_at?: string;
           id?: string;
-          is_deleted?: boolean;
           name?: string;
           updated_at?: string;
           user_id?: string;
@@ -132,7 +123,6 @@ export type Database = {
           comment: string | null;
           created_at: string;
           id: string;
-          is_deleted: boolean;
           is_favorite: boolean | null;
           is_watched: boolean | null;
           updated_at: string;
@@ -143,7 +133,6 @@ export type Database = {
           comment?: string | null;
           created_at?: string;
           id?: string;
-          is_deleted?: boolean;
           is_favorite?: boolean | null;
           is_watched?: boolean | null;
           updated_at?: string;
@@ -154,7 +143,6 @@ export type Database = {
           comment?: string | null;
           created_at?: string;
           id?: string;
-          is_deleted?: boolean;
           is_favorite?: boolean | null;
           is_watched?: boolean | null;
           updated_at?: string;
@@ -175,7 +163,6 @@ export type Database = {
         Row: {
           created_at: string;
           id: string;
-          is_deleted: boolean;
           tag_id: string;
           updated_at: string;
           user_id: string;
@@ -184,7 +171,6 @@ export type Database = {
         Insert: {
           created_at?: string;
           id?: string;
-          is_deleted?: boolean;
           tag_id: string;
           updated_at?: string;
           user_id: string;
@@ -193,7 +179,6 @@ export type Database = {
         Update: {
           created_at?: string;
           id?: string;
-          is_deleted?: boolean;
           tag_id?: string;
           updated_at?: string;
           user_id?: string;
@@ -222,7 +207,6 @@ export type Database = {
           comment_count: number | null;
           duration: string | null;
           id: string;
-          is_deleted: boolean;
           like_count: number | null;
           published_at: string;
           raw_data: Json | null;
@@ -237,7 +221,6 @@ export type Database = {
           comment_count?: number | null;
           duration?: string | null;
           id: string;
-          is_deleted?: boolean;
           like_count?: number | null;
           published_at: string;
           raw_data?: Json | null;
@@ -252,7 +235,6 @@ export type Database = {
           comment_count?: number | null;
           duration?: string | null;
           id?: string;
-          is_deleted?: boolean;
           like_count?: number | null;
           published_at?: string;
           raw_data?: Json | null;
