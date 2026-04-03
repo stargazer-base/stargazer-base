@@ -43,7 +43,7 @@ export default function GuestLoginButton({
     <button
       onClick={handleGuestLogin}
       disabled={isLoading}
-      className="inline-flex w-full items-center justify-center rounded-xl border border-indigo-500/30 bg-indigo-500/20 px-8 py-4 font-bold tracking-wider text-indigo-100 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-indigo-400/60 hover:bg-indigo-500/30 hover:shadow-[0_0_20px_rgba(129,140,248,0.3)] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-none sm:w-auto"
+      className="inline-flex w-full items-center justify-center rounded-xl border border-white/10 bg-white/5 px-8 py-4 font-bold tracking-wider text-white backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-indigo-400/60 hover:bg-white/10 hover:shadow-[0_0_20px_rgba(129,140,248,0.2)] sm:w-auto"
     >
       <svg
         className="mr-3 h-5 w-5"
