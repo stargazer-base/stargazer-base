@@ -38,7 +38,7 @@ export default async function MovieLogPage() {
   // ユーザの推し（oshis）情報の取得
   let initialUserOshis: string[] = [];
   let initialMostFav: string | null = null;
-  const isGuest = (user as any)?.is_anonymous || false;
+  const isGuest = (user as { is_anonymous?: boolean } | null)?.is_anonymous || false;
   
   if (user && !isGuest) {
     const { data: userOshis } = await supabase
