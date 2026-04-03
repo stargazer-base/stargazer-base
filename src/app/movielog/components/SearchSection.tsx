@@ -91,25 +91,30 @@ export default function SearchSection({
             <h3 className="text-lg font-semibold text-white/90">動画を検索</h3>
 
             {/* キーワード検索 */}
-            <div className="flex w-full items-center gap-3 rounded-full border border-white/10 bg-black/40 px-4 py-2 transition-colors focus-within:border-white/30">
-              <FontAwesomeIcon
-                icon={faMagnifyingGlass}
-                className="text-white/40"
-              />
-              <input
-                type="text"
-                placeholder="キーワードを入力..."
-                value={keyword}
-                onChange={(e) => setKeyword(e.target.value)}
-                className="w-full bg-transparent text-sm text-white placeholder-white/40 outline-none"
-              />
+            <div className="flex flex-col gap-2">
+              <span className="text-[10px] font-normal uppercase tracking-wider text-indigo-200">
+                タイトル 一言コメント
+              </span>
+              <div className="flex w-full items-center gap-3 rounded-full border border-white/10 bg-black/40 px-4 py-2 transition-colors focus-within:border-white/30">
+                <FontAwesomeIcon
+                  icon={faMagnifyingGlass}
+                  className="text-white/40"
+                />
+                <input
+                  type="text"
+                  placeholder="複数指定は空白区切り"
+                  value={keyword}
+                  onChange={(e) => setKeyword(e.target.value)}
+                  className="w-full bg-transparent text-sm text-white placeholder-white/40 outline-none"
+                />
+              </div>
             </div>
 
             {/* 推しフィルター (複数選択チップ) */}
             {oshis.length > 0 && (
               <div className="flex flex-col gap-2">
                 <span className="text-[10px] font-normal uppercase tracking-wider text-indigo-200">
-                  推し
+                  推し（敬称略）
                 </span>
                 <div className="flex flex-wrap gap-2">
                   {oshis.map((oshi) => (
@@ -123,6 +128,30 @@ export default function SearchSection({
                       }`}
                     >
                       {oshi.name_jp}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* タグフィルター (複数選択チップ) */}
+            {tags.length > 0 && (
+              <div className="flex flex-col gap-2">
+                <span className="text-[10px] font-normal uppercase tracking-wider text-indigo-200">
+                  タグ
+                </span>
+                <div className="flex flex-wrap gap-2">
+                  {tags.map((tag) => (
+                    <button
+                      key={tag.id}
+                      onClick={() => toggleTag(tag.id)}
+                      className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-all ${
+                        selectedTags.includes(tag.id)
+                          ? 'border-indigo-400 bg-indigo-500/30 text-indigo-100 shadow-[0_0_10px_rgba(99,102,241,0.3)]'
+                          : 'border-white/10 bg-black/20 text-white/50 hover:border-white/30 hover:text-white/80'
+                      }`}
+                    >
+                      {tag.name}
                     </button>
                   ))}
                 </div>
@@ -185,30 +214,6 @@ export default function SearchSection({
                 </div>
               </div>
             </div>
-
-            {/* タグフィルター (複数選択チップ) */}
-            {tags.length > 0 && (
-              <div className="flex flex-col gap-2">
-                <span className="text-[10px] font-normal uppercase tracking-wider text-indigo-200">
-                  タグ
-                </span>
-                <div className="flex flex-wrap gap-2">
-                  {tags.map((tag) => (
-                    <button
-                      key={tag.id}
-                      onClick={() => toggleTag(tag.id)}
-                      className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-all ${
-                        selectedTags.includes(tag.id)
-                          ? 'border-fuchsia-400 bg-fuchsia-500/30 text-fuchsia-100 shadow-[0_0_10px_rgba(217,70,239,0.3)]'
-                          : 'border-white/10 bg-black/20 text-white/50 hover:border-white/30 hover:text-white/80'
-                      }`}
-                    >
-                      {tag.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
 
             <div className="mt-4 flex items-center justify-between border-t border-white/10 pt-4">
               <button

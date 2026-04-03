@@ -9,6 +9,7 @@ vi.mock('@/lib/supabase/server', () => {
     from: vi.fn().mockReturnThis(),
     select: vi.fn().mockReturnThis(),
     eq: vi.fn().mockReturnThis(),
+    in: vi.fn().mockReturnThis(),
     order: vi.fn().mockReturnThis(), // これも return this に変更！
     limit: vi.fn().mockReturnThis(), // 追加
     // 最後に await された時に返るデータ
@@ -69,7 +70,7 @@ describe('MovieLog：推し色に染まる', () => {
 
     // MovieCardコンポーネントの中に存在するはずの要素（例としてダミータグ）で描画を確認
     // モックデータ2件分が描画されるため `getAllByText` を使用
-    const tags = screen.getAllByText('#初配信');
+    const tags = screen.getAllByText('自分用タグをここに表示できます。');
     expect(tags.length).toBe(2);
   });
 });
