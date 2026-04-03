@@ -58,13 +58,20 @@ export default async function MovieLogPage() {
 
   // 動画の取得
   let videos: VideoData[] = [];
+  let totalVideoCount = 0;
   if (initialUserOshis.length > 0) {
+    const { count } = await supabase
+      .from('videos')
+      .select('id', { count: 'exact', head: true })
+      .in('channel_id', initialUserOshis);
+    totalVideoCount = count || 0;
+
     const { data } = await supabase
       .from('videos')
       .select('id, thumbnail_url, channel_id, title')
       .in('channel_id', initialUserOshis)
       .order('published_at', { ascending: false })
-      .limit(600);
+      .limit(50);
     if (data) {
       videos = data;
     }
@@ -106,6 +113,7 @@ export default async function MovieLogPage() {
       {/* クライアント側コンポーネントで検索と動画一覧を管理 */}
       <MovieLogClient
         initialVideos={videos || []}
+        totalVideoCount={totalVideoCount}
         oshis={channels || []}
         tags={tags || []}
         initialUserOshis={initialUserOshis}

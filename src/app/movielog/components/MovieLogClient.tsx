@@ -20,6 +20,7 @@ interface Video {
 
 interface MovieLogClientProps {
   initialVideos: Video[];
+  totalVideoCount: number;
   oshis: { id: string; name_jp: string; color_code: string }[];
   tags: { id: string; name: string }[];
   initialUserOshis: string[];
@@ -31,6 +32,7 @@ interface MovieLogClientProps {
 
 export default function MovieLogClient({
   initialVideos,
+  totalVideoCount,
   oshis,
   tags,
   initialUserOshis,
@@ -220,8 +222,8 @@ export default function MovieLogClient({
       <div className="mt-6 flex w-full max-w-5xl flex-col items-center justify-center gap-4">
         <Text variant="subTitle">
           推しへの染まり度 ♡{' '}
-          {initialVideos.length > 0 ? Math.round((dyedCount / initialVideos.length) * 100) : 0}% (
-          {dyedCount} / {initialVideos.length})
+          {totalVideoCount > 0 ? Math.round((dyedCount / totalVideoCount) * 100) : 0}% (
+          {dyedCount} / {totalVideoCount})
         </Text>
       </div>
 
