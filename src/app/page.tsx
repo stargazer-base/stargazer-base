@@ -116,6 +116,50 @@ export default async function Home() {
           </>
         )}
       </div>
+
+      {/* フッター */}
+      <footer className="mt-16 flex w-full max-w-5xl flex-col items-center justify-center space-y-4 rounded-2xl border border-white/10 bg-white/5 p-8 backdrop-blur-md">
+        {/* リンク */}
+        <ul className="mb-6 flex justify-center space-x-6">
+          <li>
+            <Link href="/terms">
+              <Text variant="body" className="text-center text-indigo-100">
+                利用規約
+              </Text>
+            </Link>
+          </li>
+          <li>
+            <Link href="/privacy">
+              <Text variant="body" className="text-center text-indigo-100">
+                プライバシーポリシー
+              </Text>
+            </Link>
+          </li>
+          <li>
+            <a
+              href="https://x.com/あなたのXアカウント"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Text variant="body" className="text-center text-indigo-100">
+                お問い合わせ(X)
+              </Text>
+            </a>
+          </li>
+        </ul>
+
+        {/* 免責事項 */}
+        <Text variant="body" className="text-center text-indigo-100">
+          ※当アプリはファンが個人で作成した非公式アプリであり、株式会社STPR及び所属クリエイター様とは一切関係ありません。
+        </Text>
+
+        {/* コピーライト */}
+        <Text variant="body" className="text-center text-indigo-100">
+          &copy; 2026 推し天文台 -Stargazer Base-.
+          <br />
+          All rights reserved.
+        </Text>
+      </footer>
     </main>
   );
 }
