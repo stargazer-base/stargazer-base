@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server';
 import GoogleLoginButton from '@/components/ui/GoogleLoginButton';
 import GuestLoginButton from '@/components/ui/GuestLoginButton';
 import LogoutButton from '@/components/ui/LogoutButton';
+import { StprFamilyStars } from '@/components/top/StprFamilyStars';
 
 export default async function Home() {
   const supabase = createClient();
@@ -13,7 +14,7 @@ export default async function Home() {
   } = await supabase.auth.getUser();
 
   return (
-    <main className="flex flex-col items-center justify-center px-8 py-24 text-center">
+    <main className="flex flex-col items-center justify-center gap-8 px-8 py-24 text-center">
       {/* タイトルとサブタイトル */}
       <div className="title-top-page">
         <Text variant="pageTitle">推し天文台</Text>
@@ -23,14 +24,7 @@ export default async function Home() {
       </div>
 
       {/* STPRファミリーの星たち */}
-      <div className="text-yellow-200/80 drop-shadow-[0_0_8px_rgba(253,230,138,0.5)]">
-        <p className="mt-8 tracking-[0.5em]">★★★★★★</p>
-        <p className="mt-2 tracking-[0.3em]">★★★★</p>
-        <p className="mt-2 tracking-[0.2em]">★★★★★★</p>
-        <p className="mt-2 tracking-[0.4em]">★★★★★★</p>
-        <p className="mt-2 tracking-[0.5em]">★★★★★★★</p>
-        <p className="mt-2 tracking-[0.3em]">★★★★★★</p>
-      </div>
+      <StprFamilyStars />
 
       {/* アプリ一覧 */}
       <div className="flex w-full max-w-5xl flex-col items-center justify-center">
