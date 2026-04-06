@@ -2,8 +2,6 @@
 
 import React, { useMemo, useState, useEffect } from 'react';
 import SearchSection, { FilterState } from './SearchSection';
-import MovieCard from '@/components/ui/MovieCard';
-import { Text } from '@/components/ui/Text';
 import { createClient } from '@/lib/supabase/client';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHeart } from '@fortawesome/free-regular-svg-icons';

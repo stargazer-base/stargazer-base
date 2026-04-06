@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useRef, useMemo, useEffect, useState, useCallback } from 'react';
-import { useVirtualizer } from '@tanstack/react-virtual';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
+import { useWindowVirtualizer } from '@tanstack/react-virtual';
 import MovieCard from '@/components/ui/MovieCard';
 import { fetchVideos } from '@/lib/supabase/queries/videos';
 import { FilterState } from './SearchSection';
@@ -52,10 +52,17 @@ interface VirtualizedVideoListProps {
   userTags: Tag[];
   oshis: ChannelData[];
   glowColor: string | null;
-  onWatchChange: (videoId: string, isWatched: boolean) => void | Promise<any>;
-  onCommentSave: (videoId: string, comment: string) => void | Promise<any>;
-  onFavoriteToggle: (videoId: string, isFavorite: boolean) => void | Promise<any>;
-  onTagsSave: (videoId: string, selectedTagIds: string[], newTagNames: string[]) => void | Promise<any>;
+  onWatchChange: (videoId: string, isWatched: boolean) => void | Promise<boolean | void>;
+  onCommentSave: (videoId: string, comment: string) => void | Promise<boolean | void>;
+  onFavoriteToggle: (
+    videoId: string,
+    isFavorite: boolean
+  ) => void | Promise<boolean | void>;
+  onTagsSave: (
+    videoId: string,
+    selectedTagIds: string[],
+    newTagNames: string[]
+  ) => void | Promise<boolean | void>;
 }
 
 /**
@@ -99,21 +106,27 @@ export default function VirtualizedVideoList({
       setIsLoading(true);
       setVideos([]); // 画面をクリアしてリロード感を出す
       setHasMore(true);
-      
+
       // 検索パネルでの推し選択があればそれを優先、なければ基本の推し設定を使用
-      const activeChannelIds = appliedFilters && appliedFilters.selectedOshis.length > 0 
-        ? appliedFilters.selectedOshis 
-        : filterChannelIds;
+      const activeChannelIds =
+        appliedFilters && appliedFilters.selectedOshis.length > 0
+          ? appliedFilters.selectedOshis
+          : filterChannelIds;
 
       // 最初から(offset: 0)取得
-      const newVideos = await fetchVideos(0, userId, activeChannelIds, appliedFilters || undefined);
+      const newVideos = await fetchVideos(
+        0,
+        userId,
+        activeChannelIds,
+        appliedFilters || undefined
+      );
       setVideos(newVideos);
-      
+
       if (newVideos.length < 50) {
         setHasMore(false);
       }
       setIsLoading(false);
-      
+
       // 最上部へ戻る (絞り込み時は必須)
       window.scrollTo({ top: 0 });
     };
@@ -134,12 +147,14 @@ export default function VirtualizedVideoList({
     if (parentRef.current) {
       setScrollMargin(parentRef.current.offsetTop);
     }
-    
+
     const updateColumns = () => {
       if (parentRef.current) {
         const width = parentRef.current.offsetWidth;
-        if (width >= 1024) setColumns(3); // lg
-        else if (width >= 640) setColumns(2); // sm
+        if (width >= 1024)
+          setColumns(3); // lg
+        else if (width >= 640)
+          setColumns(2); // sm
         else setColumns(1);
       }
     };
@@ -155,26 +170,38 @@ export default function VirtualizedVideoList({
   // --- 追加データの取得 ---
   const fetchMore = useCallback(async () => {
     if (isLoading || !hasMore) return;
-    
-    setIsLoading(true);
-    const activeChannelIds = appliedFilters && appliedFilters.selectedOshis.length > 0 
-      ? appliedFilters.selectedOshis 
-      : filterChannelIds;
 
-    const newVideos = await fetchVideos(videos.length, userId, activeChannelIds, appliedFilters || undefined);
-    
+    setIsLoading(true);
+    const activeChannelIds =
+      appliedFilters && appliedFilters.selectedOshis.length > 0
+        ? appliedFilters.selectedOshis
+        : filterChannelIds;
+
+    const newVideos = await fetchVideos(
+      videos.length,
+      userId,
+      activeChannelIds,
+      appliedFilters || undefined
+    );
+
     if (newVideos.length === 0) {
       setHasMore(false);
     } else {
       setVideos((prev) => [...prev, ...newVideos]);
     }
     setIsLoading(false);
-  }, [videos.length, isLoading, hasMore, filterChannelIds, appliedFilters, userId]);
+  }, [
+    videos.length,
+    isLoading,
+    hasMore,
+    filterChannelIds,
+    appliedFilters,
+    userId,
+  ]);
 
   // --- 仮想化の設定 ---
-  const rowVirtualizer = useVirtualizer({
+  const rowVirtualizer = useWindowVirtualizer({
     count: rowCount,
-    getScrollElement: () => (typeof window !== 'undefined' ? (window as any) : null),
     estimateSize: () => 450,
     overscan: 5,
     scrollMargin,
@@ -182,7 +209,8 @@ export default function VirtualizedVideoList({
       const element = instance.scrollElement;
       if (!element) return;
       if (element instanceof Window) {
-        const handler = () => cb({ width: element.innerWidth, height: element.innerHeight });
+        const handler = () =>
+          cb({ width: element.innerWidth, height: element.innerHeight });
         handler();
         element.addEventListener('resize', handler);
         return () => element.removeEventListener('resize', handler);
@@ -190,7 +218,11 @@ export default function VirtualizedVideoList({
       if (typeof ResizeObserver === 'undefined') return;
       const observer = new ResizeObserver((entries) => {
         const entry = entries[0];
-        if (entry) cb({ width: entry.contentRect.width, height: entry.contentRect.height });
+        if (entry)
+          cb({
+            width: entry.contentRect.width,
+            height: entry.contentRect.height,
+          });
       });
       observer.observe(element as Element);
       return () => observer.unobserve(element as Element);
@@ -198,7 +230,13 @@ export default function VirtualizedVideoList({
     observeElementOffset: (instance, cb) => {
       const element = instance.scrollElement;
       if (!element) return;
-      const handler = (isScrolling: boolean) => cb(element instanceof Window ? element.scrollY : (element as any).scrollTop, isScrolling);
+      const handler = (isScrolling: boolean) =>
+        cb(
+          element instanceof Window
+            ? element.scrollY
+            : (element as HTMLElement).scrollTop,
+          isScrolling
+        );
       const onScroll = () => handler(true);
       handler(false);
       element.addEventListener('scroll', onScroll, { passive: true });
@@ -259,17 +297,29 @@ export default function VirtualizedVideoList({
                     video={{
                       id: video.id,
                       title: video.title,
-                      channelName: oshis.find((o) => o.id === video.channel_id)?.name_jp || 'Unknown',
+                      channelName:
+                        oshis.find((o) => o.id === video.channel_id)?.name_jp ||
+                        'Unknown',
                     }}
                     isWatched={logs[video.id]?.is_watched || false}
                     comment={logs[video.id]?.comment || ''}
                     isFavorite={logs[video.id]?.is_favorite || false}
-                    videoTags={userTags.filter((t) => (videoTagsMap[video.id] || []).includes(t.id))}
+                    videoTags={userTags.filter((t) =>
+                      (videoTagsMap[video.id] || []).includes(t.id)
+                    )}
                     userTags={userTags}
-                    onWatchChange={(isWatched) => onWatchChange(video.id, isWatched)}
-                    onCommentSave={(comment) => onCommentSave(video.id, comment)}
-                    onFavoriteToggle={(isFav) => onFavoriteToggle(video.id, isFav)}
-                    onTagsSave={(selectedIds, newNames) => onTagsSave(video.id, selectedIds, newNames)}
+                    onWatchChange={(isWatched) =>
+                      onWatchChange(video.id, isWatched)
+                    }
+                    onCommentSave={(comment) =>
+                      onCommentSave(video.id, comment)
+                    }
+                    onFavoriteToggle={(isFav) =>
+                      onFavoriteToggle(video.id, isFav)
+                    }
+                    onTagsSave={(selectedIds, newNames) =>
+                      onTagsSave(video.id, selectedIds, newNames)
+                    }
                     glowColor={glowColor}
                   />
                 </div>
@@ -282,13 +332,17 @@ export default function VirtualizedVideoList({
       {/* 読み込み状態の表示 */}
       <div className="flex h-20 items-center justify-center py-10">
         {isLoading && (
-          <div className="flex items-center gap-3 text-indigo-200/80 animate-pulse">
+          <div className="flex animate-pulse items-center gap-3 text-indigo-200/80">
             <div className="h-2 w-2 rounded-full bg-indigo-500"></div>
-            <span className="text-sm font-medium tracking-widest uppercase">読み込み中...</span>
+            <span className="text-sm font-medium uppercase tracking-widest">
+              読み込み中...
+            </span>
           </div>
         )}
         {!hasMore && videos.length > 0 && (
-          <span className="text-xs uppercase tracking-widest text-white/20">すべての動画を読み込みました</span>
+          <span className="text-xs uppercase tracking-widest text-white/20">
+            すべての動画を読み込みました
+          </span>
         )}
         {videos.length === 0 && !isLoading && (
           <div className="text-indigo-200/50">動画が見つかりませんでした。</div>

@@ -24,20 +24,24 @@ export async function fetchVideos(
 
   // 基本となる Select 句の決定
   // 絞り込み（'all' 以外）が必要な場合は !inner を使用して、条件に一致するログがあるもののみに制限する
-  const isFilteringWatched = filters?.watchedFilter && filters.watchedFilter !== 'all';
-  const isFilteringFavorite = filters?.favoriteFilter && filters.favoriteFilter !== 'all';
-  const joinType = (isFilteringWatched || isFilteringFavorite) ? '!inner' : '';
+  const isFilteringWatched =
+    filters?.watchedFilter && filters.watchedFilter !== 'all';
+  const isFilteringFavorite =
+    filters?.favoriteFilter && filters.favoriteFilter !== 'all';
+  const joinType = isFilteringWatched || isFilteringFavorite ? '!inner' : '';
 
   // 基本クエリの構築
   let query = supabase
     .from('videos')
-    .select(`
+    .select(
+      `
       id, 
       title, 
       channel_id, 
       published_at,
       video_logs:video_logs${joinType}(is_watched, is_favorite, comment)
-    `)
+    `
+    )
     .order('published_at', { ascending: false })
     .range(offset, offset + 49);
 
@@ -81,10 +85,14 @@ export async function fetchVideos(
   }
 
   // データの正規化 (VirtualizedVideoList が期待する形式に合わせる)
-  return (data || []).map((v: any) => ({
-    ...v,
-    // VirtualizedVideoList 側で logs プロップスを参照するため、ここではデータのみ返す
+  const videos = (data || []).map((v) => ({
+    id: v.id,
+    title: v.title,
+    channel_id: v.channel_id,
+    published_at: v.published_at,
   }));
+
+  return videos;
 }
 
 /**
@@ -93,7 +101,10 @@ export async function fetchVideos(
  * @param channelIds 選択されている推しチャンネルのIDリスト
  * @returns { totalCount, dyedCount }
  */
-export async function fetchDyeingStats(userId: string | null, channelIds: string[]) {
+export async function fetchDyeingStats(
+  userId: string | null,
+  channelIds: string[]
+) {
   const supabase = createClient();
 
   if (channelIds.length === 0) {
@@ -129,6 +140,6 @@ export async function fetchDyeingStats(userId: string | null, channelIds: string
 
   return {
     totalCount: totalCount || 0,
-    dyedCount: dyedCount || 0
+    dyedCount: dyedCount || 0,
   };
 }
