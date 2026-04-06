@@ -125,7 +125,7 @@ export function useVideoLog(initialLogs: VideoLog[], userId: string | null) {
     }
 
     return isSuccess;
-  }, [logs, userId, supabase]);
+  }, [userId, supabase]);
 
   const toggleFavoriteStatus = useCallback((videoId: string, isFavorite: boolean) => {
     if (!userId) {

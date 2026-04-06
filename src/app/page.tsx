@@ -1,10 +1,12 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Text } from '@/components/ui/Text';
+import { Bullet } from '@/components/ui/Bullet/Bullet';
 import { createClient } from '@/lib/supabase/server';
 import GoogleLoginButton from '@/components/ui/GoogleLoginButton';
 import GuestLoginButton from '@/components/ui/GuestLoginButton';
 import LogoutButton from '@/components/ui/LogoutButton';
+import { StprFamilyStars } from '@/components/top/StprFamilyStars';
 
 export default async function Home() {
   const supabase = createClient();
@@ -13,7 +15,7 @@ export default async function Home() {
   } = await supabase.auth.getUser();
 
   return (
-    <main className="flex flex-col items-center justify-center px-8 py-24 text-center">
+    <main className="flex flex-col items-center justify-center gap-8 px-8 py-24 text-center">
       {/* タイトルとサブタイトル */}
       <div className="title-top-page">
         <Text variant="pageTitle">推し天文台</Text>
@@ -23,14 +25,7 @@ export default async function Home() {
       </div>
 
       {/* STPRファミリーの星たち */}
-      <div className="text-yellow-200/80 drop-shadow-[0_0_8px_rgba(253,230,138,0.5)]">
-        <p className="mt-8 tracking-[0.5em]">★★★★★★</p>
-        <p className="mt-2 tracking-[0.3em]">★★★★</p>
-        <p className="mt-2 tracking-[0.2em]">★★★★★★</p>
-        <p className="mt-2 tracking-[0.4em]">★★★★★★</p>
-        <p className="mt-2 tracking-[0.5em]">★★★★★★★</p>
-        <p className="mt-2 tracking-[0.3em]">★★★★★★</p>
-      </div>
+      <StprFamilyStars />
 
       {/* アプリ一覧 */}
       <div className="flex w-full max-w-5xl flex-col items-center justify-center">
@@ -60,16 +55,16 @@ export default async function Home() {
                 YouTube動画視聴ログ管理アプリ
               </Text>
               <ul className="mt-5 space-y-2">
-                <li className="flex justify-start">
-                  <span className="mr-2 text-indigo-400">✦</span>
+                <li className="flex items-end justify-start">
+                  <Bullet />
                   <Text variant="body">推しの軌跡を一覧化</Text>
                 </li>
-                <li className="flex justify-start">
-                  <span className="mr-2 text-indigo-400">✦</span>
+                <li className="flex items-end justify-start">
+                  <Bullet />
                   <Text variant="body">未視聴をサクッと発掘</Text>
                 </li>
-                <li className="flex justify-start">
-                  <span className="mr-2 text-indigo-400">✦</span>
+                <li className="flex items-end justify-start">
+                  <Bullet />
                   <Text variant="body">推しへの染まり度を可視化</Text>
                 </li>
               </ul>
@@ -116,6 +111,50 @@ export default async function Home() {
           </>
         )}
       </div>
+
+      {/* フッター */}
+      <footer className="mt-16 flex w-full max-w-5xl flex-col items-center justify-center space-y-4 rounded-2xl border border-white/10 bg-white/5 p-8 backdrop-blur-md">
+        {/* リンク */}
+        <ul className="mb-6 flex justify-center space-x-6">
+          <li>
+            <Link href="/terms">
+              <Text variant="body" className="text-center text-indigo-100">
+                利用規約
+              </Text>
+            </Link>
+          </li>
+          <li>
+            <Link href="/privacy">
+              <Text variant="body" className="text-center text-indigo-100">
+                プライバシーポリシー
+              </Text>
+            </Link>
+          </li>
+          <li>
+            <a
+              href="https://x.com/あなたのXアカウント"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Text variant="body" className="text-center text-indigo-100">
+                お問い合わせ(X)
+              </Text>
+            </a>
+          </li>
+        </ul>
+
+        {/* 免責事項 */}
+        <Text variant="body" className="text-center text-indigo-100">
+          ※当アプリはファンが個人で作成した非公式アプリであり、株式会社STPR及び所属クリエイター様とは一切関係ありません。
+        </Text>
+
+        {/* コピーライト */}
+        <Text variant="body" className="text-center text-indigo-100">
+          &copy; 2026 推し天文台 -Stargazer Base-.
+          <br />
+          All rights reserved.
+        </Text>
+      </footer>
     </main>
   );
 }

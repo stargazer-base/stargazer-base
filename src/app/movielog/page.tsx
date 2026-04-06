@@ -3,6 +3,7 @@ import { Text } from '@/components/ui/Text';
 import MovieLogClient from './components/MovieLogClient';
 
 import { VideoLog } from './hooks/useVideoLog';
+import { getAllChannelsNameAndColor } from '@/lib/supabase/queries/channels';
 
 interface VideoTag {
   youtube_video_id: string;
@@ -11,7 +12,6 @@ interface VideoTag {
 
 interface VideoData {
   id: string;
-  thumbnail_url: string | null;
   channel_id: string;
   title: string;
 }
@@ -19,16 +19,11 @@ interface VideoData {
 export default async function MovieLogPage() {
   const supabase = createClient();
 
-  // 推し（チャンネル）の取得
-  const { data: channels } = await supabase
-    .from('channels')
-    .select('id, name_jp, color_code')
-    .order('disp_order', { ascending: true });
+  /** 全STPRクリエイターの論理名とカラーコードを保持 */
+  const channelsAll = await getAllChannelsNameAndColor();
 
   // タグの取得
-  const { data: tags } = await supabase
-    .from('tags')
-    .select('id, name');
+  const { data: tags } = await supabase.from('tags').select('id, name');
 
   // ログインユーザ情報の取得
   const {
@@ -38,8 +33,9 @@ export default async function MovieLogPage() {
   // ユーザの推し（oshis）情報の取得
   let initialUserOshis: string[] = [];
   let initialMostFav: string | null = null;
-  const isGuest = (user as { is_anonymous?: boolean } | null)?.is_anonymous || false;
-  
+  const isGuest =
+    (user as { is_anonymous?: boolean } | null)?.is_anonymous || false;
+
   if (user && !isGuest) {
     const { data: userOshis } = await supabase
       .from('oshis')
@@ -58,7 +54,7 @@ export default async function MovieLogPage() {
   // 動画の取得
   let videos: VideoData[] = [];
   let totalVideoCount = 0;
-  
+
   if (isGuest || !user) {
     // ゲストの場合は全動画から最新50件を取得
     const { count } = await supabase
@@ -68,7 +64,7 @@ export default async function MovieLogPage() {
 
     const { data } = await supabase
       .from('videos')
-      .select('id, thumbnail_url, channel_id, title')
+      .select('id, channel_id, title')
       .order('published_at', { ascending: false })
       .limit(50);
     if (data) {
@@ -84,7 +80,7 @@ export default async function MovieLogPage() {
 
     const { data } = await supabase
       .from('videos')
-      .select('id, thumbnail_url, channel_id, title')
+      .select('id, channel_id, title')
       .in('channel_id', initialUserOshis)
       .order('published_at', { ascending: false })
       .limit(50);
@@ -129,13 +125,13 @@ export default async function MovieLogPage() {
       <MovieLogClient
         initialVideos={videos || []}
         totalVideoCount={totalVideoCount}
-        oshis={channels || []}
+        oshis={channelsAll || []}
         tags={tags || []}
         initialUserOshis={initialUserOshis}
         initialMostFav={initialMostFav}
         initialVideoLogs={initialVideoLogs}
         initialVideoTags={initialVideoTags}
-        userId={(!isGuest && user) ? user.id : null}
+        userId={!isGuest && user ? user.id : null}
       />
     </main>
   );
