@@ -257,12 +257,7 @@ export default function MovieLogClient({
         >
           {/* 左側領域: 染まり度 (Compact) - 常に表示 */}
           <div className="flex items-center gap-2 transition-all duration-500">
-            <span
-              className="whitespace-nowrap text-sm font-bold tracking-tight transition-colors duration-500"
-              style={{
-                color: mostFavColor ? mostFavColor : '#c7d2fe' /* indigo-200 */,
-              }}
-            >
+            <span className="whitespace-nowrap text-sm font-bold tracking-tight text-indigo-200 transition-colors duration-500">
               ♡{' '}
               {totalVideoCount > 0
                 ? Math.round((dyedCount / totalVideoCount) * 100)
