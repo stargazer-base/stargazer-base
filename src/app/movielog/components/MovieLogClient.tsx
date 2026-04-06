@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import SearchSection, { FilterState } from './SearchSection';
 import MovieCard from '@/components/ui/MovieCard';
 import { Text } from '@/components/ui/Text';
@@ -11,6 +11,7 @@ import { faMagnifyingGlass, faCrown } from '@fortawesome/free-solid-svg-icons';
 import { VideoLog, useVideoLog } from '../hooks/useVideoLog';
 import { useVideoTags } from '../hooks/useVideoTags';
 import { getAllChannelsNameAndColor } from '@/lib/supabase/queries/channels';
+import VirtualizedVideoList from './VirtualizedVideoList';
 
 // SQLの型定義から逆算してパラメータの型も定義する
 /** 全STPRクリエイターの論理名とカラーコード */
@@ -70,6 +71,18 @@ export default function MovieLogClient({
   const mostFavColor = useMemo(() => {
     return oshis.find((o) => o.id === mostFavOshi)?.color_code || null;
   }, [mostFavOshi, oshis]);
+
+  // スクロール位置を監視してヘッダーをコンパクトにする
+  const [isSticky, setIsSticky] = useState(false);
+  const [forceHideSticky, setForceHideSticky] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsSticky(window.scrollY > 300);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const toggleRegisteredOshi = (id: string) => {
     setRegisteredOshis((prev) => {
@@ -160,14 +173,12 @@ export default function MovieLogClient({
     }
 
     return initialVideos.filter((video) => {
-      // 推しフィルター: 選択されている推しが1つ以上ある場合、channel_idがいずれかに一致する必要がある
+      // 推しフィルター
       if (appliedFilters.selectedOshis.length > 0) {
         if (!appliedFilters.selectedOshis.includes(video.channel_id)) {
           return false;
         }
       } else {
-        // 検索で「推し」が指定されていない場合は、自分の推しに設定している動画のみ表示
-        // これにより、他のメンバーの動画を見るには必ず検索パネルで絞り込む必要がある
         if (savedOshis.length > 0) {
           if (!savedOshis.includes(video.channel_id)) {
             return false;
@@ -193,7 +204,7 @@ export default function MovieLogClient({
         if (isFavorite) return false;
       }
 
-      // タグフィルター (AND検索)
+      // タグフィルター
       if (
         appliedFilters.selectedTags &&
         appliedFilters.selectedTags.length > 0
@@ -205,7 +216,7 @@ export default function MovieLogClient({
         if (!hasAllTags) return false;
       }
 
-      // キーワードフィルター (タイトル、コメントの部分一致検索・複数キーワード 半角スペース区切りAND検索)
+      // キーキーワードフィルター
       if (appliedFilters.keyword) {
         const keywords = appliedFilters.keyword
           .toLowerCase()
@@ -214,58 +225,124 @@ export default function MovieLogClient({
         if (keywords.length > 0) {
           const title = video.title ? video.title.toLowerCase() : '';
           const comment = (logs[video.id]?.comment || '').toLowerCase();
-
           const targetText = `${title} ${comment}`;
-
           const isMatch = keywords.every((kw) => targetText.includes(kw));
-          if (!isMatch) {
-            return false;
-          }
+          if (!isMatch) return false;
         }
       }
 
       return true;
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialVideos, appliedFilters, savedOshis]);
+  }, [initialVideos, appliedFilters, savedOshis, logs, videoTagsMap, userId]);
 
   const dyedCount = useMemo(() => {
     return initialVideos.filter((v) => logs[v.id]?.is_watched).length;
   }, [initialVideos, logs]);
 
+  const isActuallySticky = isSticky && !forceHideSticky;
+
   return (
     <>
-      {/* 染まり度を表示するエリア */}
-      <div className="mt-6 flex w-full max-w-5xl flex-col items-center justify-center gap-4">
-        <Text variant="subTitle">
-          推しへの染まり度 ♡{' '}
-          {totalVideoCount > 0
-            ? Math.round((dyedCount / totalVideoCount) * 100)
-            : 0}
-          % ({dyedCount} / {totalVideoCount})
-        </Text>
-      </div>
-
-      {/* ボタンエリア（推し設定＆検索） */}
-      <div className="mt-12 flex w-full max-w-5xl flex-row items-center justify-center gap-6">
-        <button
-          onClick={() => setIsOshiPanelOpen(!isOshiPanelOpen)}
-          disabled={isSearchOpen}
-          className={`flex items-center gap-2 rounded-full px-8 py-3 font-medium tracking-wider shadow-[0_0_15px_rgba(255,255,255,0.1)] backdrop-blur-md transition-all duration-300 ${isSearchOpen ? 'scale-100 cursor-not-allowed bg-white/5 text-white/30' : 'bg-white/10 text-white/70 hover:scale-105 hover:bg-white/20 hover:text-white hover:shadow-[0_0_20px_rgba(255,255,255,0.2)]'}`}
+      {/* ボタンエリア（推し設定＆検索） - Sticky Header (Full Width Blur) */}
+      <div
+        className={`sticky top-0 z-50 -mx-8 mt-12 w-[calc(100%+4rem)] px-6 transition-all duration-500 sm:px-12 ${
+          isActuallySticky
+            ? 'bg-black/60 py-4 shadow-2xl backdrop-blur-xl'
+            : 'bg-transparent py-0'
+        }`}
+      >
+        <div
+          className={`mx-auto flex h-full max-w-5xl items-center ${isActuallySticky ? 'justify-between' : 'justify-center gap-4'}`}
         >
-          <FontAwesomeIcon icon={faHeart} size="xl" />
-          <span>推し設定</span>
-        </button>
+          {/* 左側領域: 染まり度 (Compact) - 常に表示 */}
+          <div className="flex items-center gap-2 transition-all duration-500">
+            <span
+              className="whitespace-nowrap text-sm font-bold tracking-tight transition-colors duration-500"
+              style={{
+                color: mostFavColor ? mostFavColor : '#c7d2fe' /* indigo-200 */,
+              }}
+            >
+              ♡{' '}
+              {totalVideoCount > 0
+                ? Math.round((dyedCount / totalVideoCount) * 100)
+                : 0}
+              %
+              <span className="ml-1 text-[10px] font-normal opacity-60 md:inline">
+                ({dyedCount} / {totalVideoCount})
+              </span>
+            </span>
+          </div>
 
-        <button
-          onClick={() => setIsSearchOpen(!isSearchOpen)}
-          disabled={isOshiPanelOpen}
-          className={`flex items-center gap-2 rounded-full px-8 py-3 font-medium tracking-wider shadow-[0_0_15px_rgba(255,255,255,0.1)] backdrop-blur-md transition-all duration-300 ${isOshiPanelOpen ? 'scale-100 cursor-not-allowed bg-white/5 text-white/30' : 'bg-white/10 text-white/70 hover:scale-105 hover:bg-white/20 hover:text-white hover:shadow-[0_0_20px_rgba(255,255,255,0.2)]'}`}
-        >
-          <FontAwesomeIcon icon={faMagnifyingGlass} size="xl" />
+          {/* 右側領域: アクションボタン */}
+          <div className="flex items-center gap-3 sm:gap-4">
+            <button
+              onClick={() => {
+                if (!isOshiPanelOpen) {
+                  // 開くときは：最上部へ誘導するスマート・シーケンス
+                  setForceHideSticky(true);
+                  setTimeout(() => {
+                    setIsOshiPanelOpen(true);
+                    setTimeout(() => {
+                      window.scrollTo(0, 0);
+                      setForceHideSticky(false);
+                    }, 300);
+                  }, 100);
+                } else {
+                  // 閉じるときは：その場を維持してそっと閉じる
+                  setIsOshiPanelOpen(false);
+                }
+              }}
+              disabled={isSearchOpen}
+              className={`flex items-center gap-2 rounded-full font-medium tracking-wider shadow-[0_0_15px_rgba(255,255,255,0.1)] backdrop-blur-md transition-all duration-300 ${
+                isActuallySticky ? 'px-4 py-1.5 text-xs' : 'px-5 py-2 text-sm'
+              } ${
+                isSearchOpen
+                  ? 'scale-100 cursor-not-allowed bg-white/5 text-white/30'
+                  : 'bg-white/10 text-white/70 hover:scale-105 hover:bg-white/20 hover:text-white hover:shadow-[0_0_20px_rgba(255,255,255,0.2)]'
+              }`}
+            >
+              <FontAwesomeIcon
+                icon={faHeart}
+                size={isActuallySticky ? 'sm' : 'lg'}
+              />
+              <span>推し設定</span>
+            </button>
 
-          <span>検索</span>
-        </button>
+            <button
+              onClick={() => {
+                if (!isSearchOpen) {
+                  // 開くときは：最上部へ誘導するスマート・シーケンス
+                  setForceHideSticky(true);
+                  setTimeout(() => {
+                    setIsSearchOpen(true);
+                    setTimeout(() => {
+                      window.scrollTo(0, 0);
+                      setForceHideSticky(false);
+                    }, 300);
+                  }, 100);
+                } else {
+                  // 閉じるときは：その場を維持してそっと閉じる
+                  setIsSearchOpen(false);
+                }
+              }}
+              disabled={isOshiPanelOpen}
+              className={`flex items-center gap-2 rounded-full font-medium tracking-wider shadow-[0_0_15px_rgba(255,255,255,0.1)] backdrop-blur-md transition-all duration-300 ${
+                isActuallySticky ? 'px-4 py-1.5 text-xs' : 'px-5 py-2 text-sm'
+              } ${
+                isOshiPanelOpen
+                  ? 'scale-100 cursor-not-allowed bg-white/5 text-white/30'
+                  : 'bg-white/10 text-white/70 hover:scale-105 hover:bg-white/20 hover:text-white hover:shadow-[0_0_20px_rgba(255,255,255,0.2)]'
+              }`}
+            >
+              <FontAwesomeIcon
+                icon={faMagnifyingGlass}
+                size={isActuallySticky ? 'sm' : 'lg'}
+              />
+              <span>検索</span>
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* 推し登録パネル */}
@@ -349,49 +426,20 @@ export default function MovieLogClient({
         isOpen={isSearchOpen}
       />
 
-      {/* 動画カードリスト */}
+      {/* 仮想化動画カードリスト */}
       <div className="mt-12 flex w-full max-w-5xl flex-col items-center justify-center">
-        <div className="grid w-full grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {filteredVideos.map((video) => (
-            <MovieCard
-              key={video.id}
-              video={{
-                id: video.id,
-                title: video.title,
-                channelName:
-                  oshis.find((o) => o.id === video.channel_id)?.name_jp ||
-                  'Unknown',
-              }}
-              isWatched={logs[video.id]?.is_watched || false}
-              comment={logs[video.id]?.comment || ''}
-              isFavorite={logs[video.id]?.is_favorite || false}
-              videoTags={
-                videoTagsMap[video.id]
-                  ? userTags.filter((t) =>
-                      videoTagsMap[video.id]?.includes(t.id)
-                    )
-                  : []
-              }
-              userTags={userTags}
-              onWatchChange={(isWatched) =>
-                toggleWatchStatus(video.id, isWatched)
-              }
-              onCommentSave={(comment) => updateComment(video.id, comment)}
-              onTagsSave={(selectedTagIds: string[], newTagNames: string[]) =>
-                updateVideoTags(video.id, selectedTagIds, newTagNames)
-              }
-              onFavoriteToggle={(isFavorite) =>
-                toggleFavoriteStatus(video.id, isFavorite)
-              }
-              glowColor={mostFavColor}
-            />
-          ))}
-          {filteredVideos.length === 0 && (
-            <div className="col-span-full py-12 text-center text-indigo-200/50">
-              条件に一致する動画が見つかりませんでした。
-            </div>
-          )}
-        </div>
+        <VirtualizedVideoList
+          videos={filteredVideos}
+          logs={logs}
+          videoTagsMap={videoTagsMap}
+          userTags={userTags}
+          oshis={oshis}
+          glowColor={mostFavColor}
+          onWatchChange={toggleWatchStatus}
+          onCommentSave={updateComment}
+          onFavoriteToggle={toggleFavoriteStatus}
+          onTagsSave={updateVideoTags}
+        />
       </div>
     </>
   );
