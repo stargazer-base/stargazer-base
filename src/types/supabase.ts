@@ -19,13 +19,10 @@ export type Database = {
           color_code: string;
           created_at: string;
           disp_order: number;
-          group_name: string | null;
-          group_name_jp: string | null;
           id: string;
           is_initial_sync_done: boolean;
           name: string;
           name_jp: string;
-          updated_at: string;
           upload_playlist_id: string | null;
           youtube_channel_id: string;
         };
@@ -33,13 +30,10 @@ export type Database = {
           color_code: string;
           created_at?: string;
           disp_order?: number;
-          group_name?: string | null;
-          group_name_jp?: string | null;
           id?: string;
           is_initial_sync_done?: boolean;
           name: string;
           name_jp: string;
-          updated_at?: string;
           upload_playlist_id?: string | null;
           youtube_channel_id: string;
         };
@@ -47,13 +41,10 @@ export type Database = {
           color_code?: string;
           created_at?: string;
           disp_order?: number;
-          group_name?: string | null;
-          group_name_jp?: string | null;
           id?: string;
           is_initial_sync_done?: boolean;
           name?: string;
           name_jp?: string;
-          updated_at?: string;
           upload_playlist_id?: string | null;
           youtube_channel_id?: string;
         };
@@ -65,7 +56,6 @@ export type Database = {
           created_at: string;
           id: string;
           most_fav: boolean;
-          updated_at: string;
           user_id: string;
         };
         Insert: {
@@ -73,7 +63,6 @@ export type Database = {
           created_at?: string;
           id?: string;
           most_fav?: boolean;
-          updated_at?: string;
           user_id: string;
         };
         Update: {
@@ -81,7 +70,6 @@ export type Database = {
           created_at?: string;
           id?: string;
           most_fav?: boolean;
-          updated_at?: string;
           user_id?: string;
         };
         Relationships: [
@@ -99,21 +87,18 @@ export type Database = {
           created_at: string;
           id: string;
           name: string;
-          updated_at: string;
           user_id: string;
         };
         Insert: {
           created_at?: string;
           id?: string;
           name: string;
-          updated_at?: string;
           user_id: string;
         };
         Update: {
           created_at?: string;
           id?: string;
           name?: string;
-          updated_at?: string;
           user_id?: string;
         };
         Relationships: [];
@@ -125,7 +110,6 @@ export type Database = {
           id: string;
           is_favorite: boolean | null;
           is_watched: boolean | null;
-          updated_at: string;
           user_id: string;
           youtube_video_id: string;
         };
@@ -135,7 +119,6 @@ export type Database = {
           id?: string;
           is_favorite?: boolean | null;
           is_watched?: boolean | null;
-          updated_at?: string;
           user_id: string;
           youtube_video_id: string;
         };
@@ -145,7 +128,6 @@ export type Database = {
           id?: string;
           is_favorite?: boolean | null;
           is_watched?: boolean | null;
-          updated_at?: string;
           user_id?: string;
           youtube_video_id?: string;
         };
@@ -164,7 +146,6 @@ export type Database = {
           created_at: string;
           id: string;
           tag_id: string;
-          updated_at: string;
           user_id: string;
           youtube_video_id: string;
         };
@@ -172,7 +153,6 @@ export type Database = {
           created_at?: string;
           id?: string;
           tag_id: string;
-          updated_at?: string;
           user_id: string;
           youtube_video_id: string;
         };
@@ -180,7 +160,6 @@ export type Database = {
           created_at?: string;
           id?: string;
           tag_id?: string;
-          updated_at?: string;
           user_id?: string;
           youtube_video_id?: string;
         };
@@ -204,45 +183,24 @@ export type Database = {
       videos: {
         Row: {
           channel_id: string;
-          comment_count: number | null;
-          duration: string | null;
+          created_at: string;
           id: string;
-          like_count: number | null;
           published_at: string;
-          raw_data: Json | null;
-          thumbnail_url: string | null;
           title: string;
-          updated_at: string;
-          video_type: string;
-          view_count: number | null;
         };
         Insert: {
           channel_id: string;
-          comment_count?: number | null;
-          duration?: string | null;
+          created_at?: string;
           id: string;
-          like_count?: number | null;
           published_at: string;
-          raw_data?: Json | null;
-          thumbnail_url?: string | null;
           title: string;
-          updated_at?: string;
-          video_type?: string;
-          view_count?: number | null;
         };
         Update: {
           channel_id?: string;
-          comment_count?: number | null;
-          duration?: string | null;
+          created_at?: string;
           id?: string;
-          like_count?: number | null;
           published_at?: string;
-          raw_data?: Json | null;
-          thumbnail_url?: string | null;
           title?: string;
-          updated_at?: string;
-          video_type?: string;
-          view_count?: number | null;
         };
         Relationships: [
           {
@@ -256,7 +214,18 @@ export type Database = {
       };
     };
     Views: {
-      [_ in never]: never;
+      oshi_youtube_logs: {
+        Row: {
+          '🌟': string | null;
+          '👀': string | null;
+          コメント: string | null;
+          タグ: string | null;
+          ユーザ: string | null;
+          動画タイトル: string | null;
+          推し: string | null;
+        };
+        Relationships: [];
+      };
     };
     Functions: {
       [_ in never]: never;
