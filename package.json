@@ -12,8 +12,8 @@
     "test:unit": "vitest run --exclude=\"**/*.stories.*\"",
     "format": "prettier --write --ignore-path .gitignore './**/*.{js,jsx,ts,tsx,json,css}'",
     "supabase:gen": "npm run supabase:gen:app && npm run supabase:gen:master",
-    "supabase:gen:app": "npx -y supabase gen types --lang=typescript --project-id xivberuyxpihfuabvxrt --output src/types/supabase.ts",
-    "supabase:gen:master": "npx -y supabase gen types --lang=typescript --project-id xivberuyxpihfuabvxrt --output src/types/oshiMaster.ts",
+    "supabase:gen:app": "npx -y supabase gen types --lang=typescript --project-id xivberuyxpihfuabvxrt > src/types/supabase.ts",
+    "supabase:gen:master": "npx -y supabase gen types --lang=typescript --project-id xivberuyxpihfuabvxrt > src/types/oshiMaster.ts",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
   },
