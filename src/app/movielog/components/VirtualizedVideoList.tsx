@@ -4,6 +4,7 @@ import React, { useRef, useMemo, useEffect, useState, useCallback } from 'react'
 import { useVirtualizer } from '@tanstack/react-virtual';
 import MovieCard from '@/components/ui/MovieCard';
 import { fetchVideos } from '@/lib/supabase/queries/videos';
+import { FilterState } from './SearchSection';
 
 /**
  * 動画データの型定義
@@ -13,6 +14,7 @@ interface Video {
   title: string;
   channel_id: string;
   published_at?: string;
+  thumbnail_url?: string | null;
 }
 
 /**
@@ -42,17 +44,19 @@ interface Tag {
 }
 
 interface VirtualizedVideoListProps {
+  userId: string | null;
   initialVideos: Video[];
   filterChannelIds: string[];
+  appliedFilters: FilterState | null;
   logs: Record<string, VideoLog>;
   videoTagsMap: Record<string, string[]>;
   userTags: Tag[];
   oshis: ChannelData[];
   glowColor: string | null;
-  onWatchChange: (videoId: string, isWatched: boolean) => void;
-  onCommentSave: (videoId: string, comment: string) => void;
-  onFavoriteToggle: (videoId: string, isFavorite: boolean) => void;
-  onTagsSave: (videoId: string, selectedTagIds: string[], newTagNames: string[]) => void;
+  onWatchChange: (videoId: string, isWatched: boolean) => void | Promise<any>;
+  onCommentSave: (videoId: string, comment: string) => void | Promise<any>;
+  onFavoriteToggle: (videoId: string, isFavorite: boolean) => void | Promise<any>;
+  onTagsSave: (videoId: string, selectedTagIds: string[], newTagNames: string[]) => void | Promise<any>;
 }
 
 /**
@@ -60,8 +64,10 @@ interface VirtualizedVideoListProps {
  * 画面外のDOMを破棄（仮想化）しつつ、最下部到達時に自動で次の50件を取得します。
  */
 export default function VirtualizedVideoList({
+  userId,
   initialVideos,
   filterChannelIds,
+  appliedFilters,
   logs,
   videoTagsMap,
   userTags,
@@ -89,14 +95,19 @@ export default function VirtualizedVideoList({
       return;
     }
 
-    // 推し設定（filterChannelIds）が変わったらリロードして初期化
+    // 条件（推し設定 or 検索条件）が変わったらリロードして初期化
     const resetAndFetch = async () => {
       setIsLoading(true);
       setVideos([]); // 画面をクリアしてリロード感を出す
       setHasMore(true);
       
+      // 検索パネルでの推し選択があればそれを優先、なければ基本の推し設定を使用
+      const activeChannelIds = appliedFilters && appliedFilters.selectedOshis.length > 0 
+        ? appliedFilters.selectedOshis 
+        : filterChannelIds;
+
       // 最初から(offset: 0)取得
-      const newVideos = await fetchVideos(0, filterChannelIds);
+      const newVideos = await fetchVideos(0, userId, activeChannelIds, appliedFilters || undefined);
       setVideos(newVideos);
       
       if (newVideos.length < 50) {
@@ -104,18 +115,15 @@ export default function VirtualizedVideoList({
       }
       setIsLoading(false);
       
-      // 最上部へ戻る
+      // 最上部へ戻る (絞り込み時は必須)
       window.scrollTo({ top: 0 });
     };
 
     resetAndFetch();
-  }, [filterChannelIds]);
+  }, [filterChannelIds, appliedFilters, userId]);
 
   // プロップスの initialVideos が変更された場合の同期
-  // (検索ツールなどで親側でフィルタリング済みデータが直接変わった場合にのみ実行)
   useEffect(() => {
-    // 最初のマウンド時以外は、filterChannelIds の useEffect 側に任せるため
-    // ここでの上書きは抑制的になります
     if (initialVideos.length > 0 && videos.length === 0 && !isLoading) {
       setVideos(initialVideos);
       setHasMore(true);
@@ -150,7 +158,11 @@ export default function VirtualizedVideoList({
     if (isLoading || !hasMore) return;
     
     setIsLoading(true);
-    const newVideos = await fetchVideos(videos.length, filterChannelIds);
+    const activeChannelIds = appliedFilters && appliedFilters.selectedOshis.length > 0 
+      ? appliedFilters.selectedOshis 
+      : filterChannelIds;
+
+    const newVideos = await fetchVideos(videos.length, userId, activeChannelIds, appliedFilters || undefined);
     
     if (newVideos.length === 0) {
       setHasMore(false);
@@ -158,7 +170,7 @@ export default function VirtualizedVideoList({
       setVideos((prev) => [...prev, ...newVideos]);
     }
     setIsLoading(false);
-  }, [videos.length, isLoading, hasMore, filterChannelIds]);
+  }, [videos.length, isLoading, hasMore, filterChannelIds, appliedFilters, userId]);
 
   // --- 仮想化の設定 ---
   const rowVirtualizer = useVirtualizer({

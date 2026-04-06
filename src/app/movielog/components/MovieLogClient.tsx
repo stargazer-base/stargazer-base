@@ -11,6 +11,7 @@ import { faMagnifyingGlass, faCrown } from '@fortawesome/free-solid-svg-icons';
 import { VideoLog, useVideoLog } from '../hooks/useVideoLog';
 import { useVideoTags } from '../hooks/useVideoTags';
 import { getAllChannelsNameAndColor } from '@/lib/supabase/queries/channels';
+import { fetchDyeingStats } from '@/lib/supabase/queries/videos';
 import VirtualizedVideoList from './VirtualizedVideoList';
 
 // SQLの型定義から逆算してパラメータの型も定義する
@@ -24,6 +25,7 @@ interface Video {
   thumbnail_url: string | null;
   channel_id: string;
   title: string;
+  published_at?: string;
 }
 
 interface MovieLogClientProps {
@@ -161,84 +163,20 @@ export default function MovieLogClient({
     }
   };
 
-  const filteredVideos = useMemo(() => {
-    if (!appliedFilters) {
-      if (savedOshis && savedOshis.length > 0) {
-        return initialVideos.filter((video) =>
-          savedOshis.includes(video.channel_id)
-        );
-      }
-      if (!userId) return initialVideos;
-      return [];
-    }
+  // 染まり度の統計状態 (分母は推し全動画数)
+  const [dyedStats, setDyedStats] = useState({ 
+    total: totalVideoCount, 
+    dyed: 0 
+  });
 
-    return initialVideos.filter((video) => {
-      // 推しフィルター
-      if (appliedFilters.selectedOshis.length > 0) {
-        if (!appliedFilters.selectedOshis.includes(video.channel_id)) {
-          return false;
-        }
-      } else {
-        if (savedOshis.length > 0) {
-          if (!savedOshis.includes(video.channel_id)) {
-            return false;
-          }
-        } else if (userId) {
-          return false;
-        }
-      }
-
-      // 視聴済みフィルター
-      const isWatched = logs[video.id]?.is_watched || false;
-      if (appliedFilters.watchedFilter === 'watched') {
-        if (!isWatched) return false;
-      } else if (appliedFilters.watchedFilter === 'not_watched') {
-        if (isWatched) return false;
-      }
-
-      // お気に入りフィルター
-      const isFavorite = logs[video.id]?.is_favorite || false;
-      if (appliedFilters.favoriteFilter === 'favorite') {
-        if (!isFavorite) return false;
-      } else if (appliedFilters.favoriteFilter === 'not_favorite') {
-        if (isFavorite) return false;
-      }
-
-      // タグフィルター
-      if (
-        appliedFilters.selectedTags &&
-        appliedFilters.selectedTags.length > 0
-      ) {
-        const videoTagIds = videoTagsMap[video.id] || [];
-        const hasAllTags = appliedFilters.selectedTags.every((t) =>
-          videoTagIds.includes(t)
-        );
-        if (!hasAllTags) return false;
-      }
-
-      // キーキーワードフィルター
-      if (appliedFilters.keyword) {
-        const keywords = appliedFilters.keyword
-          .toLowerCase()
-          .split(' ')
-          .filter((k) => k.trim() !== '');
-        if (keywords.length > 0) {
-          const title = video.title ? video.title.toLowerCase() : '';
-          const comment = (logs[video.id]?.comment || '').toLowerCase();
-          const targetText = `${title} ${comment}`;
-          const isMatch = keywords.every((kw) => targetText.includes(kw));
-          if (!isMatch) return false;
-        }
-      }
-
-      return true;
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialVideos, appliedFilters, savedOshis, logs, videoTagsMap, userId]);
-
-  const dyedCount = useMemo(() => {
-    return initialVideos.filter((v) => logs[v.id]?.is_watched).length;
-  }, [initialVideos, logs]);
+  // 推し設定が変更されたら統計情報をサーバーから再取得
+  useEffect(() => {
+    const updateStats = async () => {
+      const stats = await fetchDyeingStats(userId, savedOshis);
+      setDyedStats({ total: stats.totalCount, dyed: stats.dyedCount });
+    };
+    updateStats();
+  }, [savedOshis, userId]);
 
   const isActuallySticky = isSticky && !forceHideSticky;
 
@@ -257,14 +195,19 @@ export default function MovieLogClient({
         >
           {/* 左側領域: 染まり度 (Compact) - 常に表示 */}
           <div className="flex items-center gap-2 transition-all duration-500">
-            <span className="whitespace-nowrap text-sm font-bold tracking-tight text-indigo-200 transition-colors duration-500">
+            <span
+              className="whitespace-nowrap text-sm font-bold tracking-tight transition-colors duration-500"
+              style={{
+                color: mostFavColor ? mostFavColor : '#c7d2fe' /* indigo-200 */,
+              }}
+            >
               ♡{' '}
-              {totalVideoCount > 0
-                ? Math.round((dyedCount / totalVideoCount) * 100)
+              {dyedStats.total > 0
+                ? Math.round((dyedStats.dyed / dyedStats.total) * 100)
                 : 0}
               %
               <span className="ml-1 text-[10px] font-normal opacity-60 md:inline">
-                ({dyedCount} / {totalVideoCount})
+                ({dyedStats.dyed} / {dyedStats.total})
               </span>
             </span>
           </div>
@@ -424,8 +367,10 @@ export default function MovieLogClient({
       {/* 仮想化動画カードリスト */}
       <div className="mt-12 flex w-full max-w-5xl flex-col items-center justify-center">
         <VirtualizedVideoList
-          initialVideos={filteredVideos}
+          userId={userId}
+          initialVideos={initialVideos}
           filterChannelIds={savedOshis}
+          appliedFilters={appliedFilters}
           logs={logs}
           videoTagsMap={videoTagsMap}
           userTags={userTags}
