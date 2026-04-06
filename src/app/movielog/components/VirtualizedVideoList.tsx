@@ -43,6 +43,7 @@ interface Tag {
 
 interface VirtualizedVideoListProps {
   initialVideos: Video[];
+  filterChannelIds: string[];
   logs: Record<string, VideoLog>;
   videoTagsMap: Record<string, string[]>;
   userTags: Tag[];
@@ -60,6 +61,7 @@ interface VirtualizedVideoListProps {
  */
 export default function VirtualizedVideoList({
   initialVideos,
+  filterChannelIds,
   logs,
   videoTagsMap,
   userTags,
@@ -77,12 +79,48 @@ export default function VirtualizedVideoList({
   const parentRef = useRef<HTMLDivElement>(null);
   const [scrollMargin, setScrollMargin] = useState(0);
   const [columns, setColumns] = useState(1);
+  const isFirstMount = useRef(true);
 
-  // --- 初期データの同期 ---
+  // --- フィルタ更新時のリセットロジック ---
   useEffect(() => {
-    setVideos(initialVideos);
-    setHasMore(true);
-  }, [initialVideos]);
+    // 初回マウント時は page.tsx から受け取った initialVideos を優先するためスキップ
+    if (isFirstMount.current) {
+      isFirstMount.current = false;
+      return;
+    }
+
+    // 推し設定（filterChannelIds）が変わったらリロードして初期化
+    const resetAndFetch = async () => {
+      setIsLoading(true);
+      setVideos([]); // 画面をクリアしてリロード感を出す
+      setHasMore(true);
+      
+      // 最初から(offset: 0)取得
+      const newVideos = await fetchVideos(0, filterChannelIds);
+      setVideos(newVideos);
+      
+      if (newVideos.length < 50) {
+        setHasMore(false);
+      }
+      setIsLoading(false);
+      
+      // 最上部へ戻る
+      window.scrollTo({ top: 0 });
+    };
+
+    resetAndFetch();
+  }, [filterChannelIds]);
+
+  // プロップスの initialVideos が変更された場合の同期
+  // (検索ツールなどで親側でフィルタリング済みデータが直接変わった場合にのみ実行)
+  useEffect(() => {
+    // 最初のマウンド時以外は、filterChannelIds の useEffect 側に任せるため
+    // ここでの上書きは抑制的になります
+    if (initialVideos.length > 0 && videos.length === 0 && !isLoading) {
+      setVideos(initialVideos);
+      setHasMore(true);
+    }
+  }, [initialVideos, videos.length, isLoading]);
 
   // --- レイアウト・スクロール管理 ---
   useEffect(() => {
@@ -112,7 +150,7 @@ export default function VirtualizedVideoList({
     if (isLoading || !hasMore) return;
     
     setIsLoading(true);
-    const newVideos = await fetchVideos(videos.length);
+    const newVideos = await fetchVideos(videos.length, filterChannelIds);
     
     if (newVideos.length === 0) {
       setHasMore(false);
@@ -120,7 +158,7 @@ export default function VirtualizedVideoList({
       setVideos((prev) => [...prev, ...newVideos]);
     }
     setIsLoading(false);
-  }, [videos.length, isLoading, hasMore]);
+  }, [videos.length, isLoading, hasMore, filterChannelIds]);
 
   // --- 仮想化の設定 ---
   const rowVirtualizer = useVirtualizer({

@@ -425,6 +425,7 @@ export default function MovieLogClient({
       <div className="mt-12 flex w-full max-w-5xl flex-col items-center justify-center">
         <VirtualizedVideoList
           initialVideos={filteredVideos}
+          filterChannelIds={savedOshis}
           logs={logs}
           videoTagsMap={videoTagsMap}
           userTags={userTags}
