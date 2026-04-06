@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Text } from '@/components/ui/Text';
+import { Bullet } from '@/components/ui/Bullet/Bullet';
 import { createClient } from '@/lib/supabase/server';
 import GoogleLoginButton from '@/components/ui/GoogleLoginButton';
 import GuestLoginButton from '@/components/ui/GuestLoginButton';
@@ -54,16 +55,16 @@ export default async function Home() {
                 YouTube動画視聴ログ管理アプリ
               </Text>
               <ul className="mt-5 space-y-2">
-                <li className="flex justify-start">
-                  <span className="mr-2 text-indigo-400">✦</span>
+                <li className="flex items-end justify-start">
+                  <Bullet />
                   <Text variant="body">推しの軌跡を一覧化</Text>
                 </li>
-                <li className="flex justify-start">
-                  <span className="mr-2 text-indigo-400">✦</span>
+                <li className="flex items-end justify-start">
+                  <Bullet />
                   <Text variant="body">未視聴をサクッと発掘</Text>
                 </li>
-                <li className="flex justify-start">
-                  <span className="mr-2 text-indigo-400">✦</span>
+                <li className="flex items-end justify-start">
+                  <Bullet />
                   <Text variant="body">推しへの染まり度を可視化</Text>
                 </li>
               </ul>
