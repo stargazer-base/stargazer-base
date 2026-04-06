@@ -36,7 +36,6 @@ export async function fetchVideos(
       title, 
       channel_id, 
       published_at,
-      thumbnail_url,
       video_logs:video_logs${joinType}(is_watched, is_favorite, comment)
     `)
     .order('published_at', { ascending: false })

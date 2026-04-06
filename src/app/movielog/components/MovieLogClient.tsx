@@ -22,7 +22,6 @@ type ChannelData = Awaited<
 
 interface Video {
   id: string;
-  thumbnail_url: string | null;
   channel_id: string;
   title: string;
   published_at?: string;
@@ -164,9 +163,9 @@ export default function MovieLogClient({
   };
 
   // 染まり度の統計状態 (分母は推し全動画数)
-  const [dyedStats, setDyedStats] = useState({ 
-    total: totalVideoCount, 
-    dyed: 0 
+  const [dyedStats, setDyedStats] = useState({
+    total: totalVideoCount,
+    dyed: 0,
   });
 
   // 推し設定が変更されたら統計情報をサーバーから再取得

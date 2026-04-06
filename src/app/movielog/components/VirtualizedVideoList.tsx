@@ -14,7 +14,6 @@ interface Video {
   title: string;
   channel_id: string;
   published_at?: string;
-  thumbnail_url?: string | null;
 }
 
 /**

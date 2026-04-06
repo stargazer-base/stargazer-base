@@ -12,7 +12,6 @@ interface VideoTag {
 
 interface VideoData {
   id: string;
-  thumbnail_url: string | null;
   channel_id: string;
   title: string;
 }
@@ -65,7 +64,7 @@ export default async function MovieLogPage() {
 
     const { data } = await supabase
       .from('videos')
-      .select('id, thumbnail_url, channel_id, title')
+      .select('id, channel_id, title')
       .order('published_at', { ascending: false })
       .limit(50);
     if (data) {
@@ -81,7 +80,7 @@ export default async function MovieLogPage() {
 
     const { data } = await supabase
       .from('videos')
-      .select('id, thumbnail_url, channel_id, title')
+      .select('id, channel_id, title')
       .in('channel_id', initialUserOshis)
       .order('published_at', { ascending: false })
       .limit(50);
