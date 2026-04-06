@@ -10,6 +10,13 @@ import { faHeart } from '@fortawesome/free-regular-svg-icons';
 import { faMagnifyingGlass, faCrown } from '@fortawesome/free-solid-svg-icons';
 import { VideoLog, useVideoLog } from '../hooks/useVideoLog';
 import { useVideoTags } from '../hooks/useVideoTags';
+import { getAllChannelsNameAndColor } from '@/lib/supabase/queries/channels';
+
+// SQLの型定義から逆算してパラメータの型も定義する
+/** 全STPRクリエイターの論理名とカラーコード */
+type ChannelData = Awaited<
+  ReturnType<typeof getAllChannelsNameAndColor>
+>[number];
 
 interface Video {
   id: string;
@@ -21,7 +28,7 @@ interface Video {
 interface MovieLogClientProps {
   initialVideos: Video[];
   totalVideoCount: number;
-  oshis: { id: string; name_jp: string; color_code: string }[];
+  oshis: ChannelData[];
   tags: { id: string; name: string }[];
   initialUserOshis: string[];
   initialMostFav: string | null;
