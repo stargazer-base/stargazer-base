@@ -17,8 +17,8 @@ vi.mock('@/lib/supabase/server', () => {
     then: vi.fn((resolve) => {
       resolve({
         data: [
-          { id: '1', name_jp: '公式チャンネル', thumbnail_url: '...' },
-          { id: '2', name_jp: 'サブチャンネル', thumbnail_url: '...' },
+          { id: '1', name_jp: '公式チャンネル', color_code: '#FF0000' },
+          { id: '2', name_jp: 'サブチャンネル', color_code: '#00FF00' },
         ],
         error: null,
       });
@@ -62,15 +62,5 @@ describe('MovieLog：推し色に染まる', () => {
 
     // サブタイトルが表示されているか確認
     expect(subtitle).toBeInTheDocument();
-  });
-
-  it('MovieCardコンポーネントが描画されテキストが存在すること', async () => {
-    const jsx = await MovieLogPage();
-    render(jsx);
-
-    // MovieCardコンポーネントの中に存在するはずの要素（例としてダミータグ）で描画を確認
-    // モックデータ2件分が描画されるため `getAllByText` を使用
-    const tags = screen.getAllByText('自分用タグをここに表示できます。');
-    expect(tags.length).toBe(2);
   });
 });

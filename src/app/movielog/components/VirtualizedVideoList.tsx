@@ -187,6 +187,7 @@ export default function VirtualizedVideoList({
         element.addEventListener('resize', handler);
         return () => element.removeEventListener('resize', handler);
       }
+      if (typeof ResizeObserver === 'undefined') return;
       const observer = new ResizeObserver((entries) => {
         const entry = entries[0];
         if (entry) cb({ width: entry.contentRect.width, height: entry.contentRect.height });
