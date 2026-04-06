@@ -429,7 +429,7 @@ export default function MovieLogClient({
       {/* 仮想化動画カードリスト */}
       <div className="mt-12 flex w-full max-w-5xl flex-col items-center justify-center">
         <VirtualizedVideoList
-          videos={filteredVideos}
+          initialVideos={filteredVideos}
           logs={logs}
           videoTagsMap={videoTagsMap}
           userTags={userTags}

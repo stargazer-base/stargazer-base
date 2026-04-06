@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useRef, useMemo, useEffect } from 'react';
+import React, { useRef, useMemo, useEffect, useState, useCallback } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import MovieCard from '@/components/ui/MovieCard';
+import { fetchVideos } from '@/lib/supabase/queries/videos';
 
 /**
  * 動画データの型定義
@@ -11,6 +12,7 @@ interface Video {
   id: string;
   title: string;
   channel_id: string;
+  published_at?: string;
 }
 
 /**
@@ -40,7 +42,7 @@ interface Tag {
 }
 
 interface VirtualizedVideoListProps {
-  videos: Video[];
+  initialVideos: Video[];
   logs: Record<string, VideoLog>;
   videoTagsMap: Record<string, string[]>;
   userTags: Tag[];
@@ -53,11 +55,11 @@ interface VirtualizedVideoListProps {
 }
 
 /**
- * 大量案件のYouTube動画を軽量に描画するための仮想化リストコンポーネント
- * ウィンドウ全体のスクロールに対応しています（Window Virtualization）。
+ * 無限スクロール付き仮想化リストコンポーネント
+ * 画面外のDOMを破棄（仮想化）しつつ、最下部到達時に自動で次の50件を取得します。
  */
 export default function VirtualizedVideoList({
-  videos,
+  initialVideos,
   logs,
   videoTagsMap,
   userTags,
@@ -68,20 +70,26 @@ export default function VirtualizedVideoList({
   onFavoriteToggle,
   onTagsSave,
 }: VirtualizedVideoListProps) {
+  // --- 状態管理 ---
+  const [videos, setVideos] = useState<Video[]>(initialVideos);
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
   const parentRef = useRef<HTMLDivElement>(null);
-  const [scrollMargin, setScrollMargin] = React.useState(0);
+  const [scrollMargin, setScrollMargin] = useState(0);
+  const [columns, setColumns] = useState(1);
 
-  // 初回レンダリング後にリストの上部オフセットを計測
+  // --- 初期データの同期 ---
+  useEffect(() => {
+    setVideos(initialVideos);
+    setHasMore(true);
+  }, [initialVideos]);
+
+  // --- レイアウト・スクロール管理 ---
   useEffect(() => {
     if (parentRef.current) {
       setScrollMargin(parentRef.current.offsetTop);
     }
-  }, []);
-
-  // コンテナの幅に基づいて列数を決定
-  const [columns, setColumns] = React.useState(1);
-
-  useEffect(() => {
+    
     const updateColumns = () => {
       if (parentRef.current) {
         const width = parentRef.current.offsetWidth;
@@ -99,48 +107,48 @@ export default function VirtualizedVideoList({
   // 行数の計算
   const rowCount = Math.ceil(videos.length / columns);
 
-  // 仮想化の設定（ウィンドウ仮想化）
+  // --- 追加データの取得 ---
+  const fetchMore = useCallback(async () => {
+    if (isLoading || !hasMore) return;
+    
+    setIsLoading(true);
+    const newVideos = await fetchVideos(videos.length);
+    
+    if (newVideos.length === 0) {
+      setHasMore(false);
+    } else {
+      setVideos((prev) => [...prev, ...newVideos]);
+    }
+    setIsLoading(false);
+  }, [videos.length, isLoading, hasMore]);
+
+  // --- 仮想化の設定 ---
   const rowVirtualizer = useVirtualizer({
     count: rowCount,
     getScrollElement: () => (typeof window !== 'undefined' ? (window as any) : null),
     estimateSize: () => 450,
     overscan: 5,
     scrollMargin,
-    // Window仮想化時のResizeObserverエラーを回避するためのカスタムオブザーバー
     observeElementRect: (instance, cb) => {
       const element = instance.scrollElement;
       if (!element) return;
-
       if (element instanceof Window) {
-        const handler = () => {
-          cb({ width: element.innerWidth, height: element.innerHeight });
-        };
+        const handler = () => cb({ width: element.innerWidth, height: element.innerHeight });
         handler();
         element.addEventListener('resize', handler);
         return () => element.removeEventListener('resize', handler);
       }
-
       const observer = new ResizeObserver((entries) => {
         const entry = entries[0];
-        if (entry) {
-          cb({
-            width: entry.contentRect.width,
-            height: entry.contentRect.height,
-          });
-        }
+        if (entry) cb({ width: entry.contentRect.width, height: entry.contentRect.height });
       });
       observer.observe(element as Element);
       return () => observer.unobserve(element as Element);
     },
-    // Window仮想化時のスクロール位置を正確に取得するためのカスタム実装
     observeElementOffset: (instance, cb) => {
       const element = instance.scrollElement;
       if (!element) return;
-
-      const handler = (isScrolling: boolean) => {
-        cb(element instanceof Window ? element.scrollY : (element as any).scrollTop, isScrolling);
-      };
-
+      const handler = (isScrolling: boolean) => cb(element instanceof Window ? element.scrollY : (element as any).scrollTop, isScrolling);
       const onScroll = () => handler(true);
       handler(false);
       element.addEventListener('scroll', onScroll, { passive: true });
@@ -148,12 +156,20 @@ export default function VirtualizedVideoList({
     },
   });
 
+  // --- 無限スクロールの検知 ---
+  const virtualItems = rowVirtualizer.getVirtualItems();
+  useEffect(() => {
+    if (virtualItems.length > 0) {
+      const lastItem = virtualItems[virtualItems.length - 1];
+      // 描画されている最後の要素（lastItem.index）が配列の末尾（rowCount - 1）に近づいたら取得
+      if (lastItem && lastItem.index >= rowCount - 1 && hasMore && !isLoading) {
+        fetchMore();
+      }
+    }
+  }, [virtualItems, rowCount, hasMore, isLoading, fetchMore]);
+
   return (
-    <div
-      ref={parentRef}
-      className="w-full"
-      style={{ contain: 'none' }}
-    >
+    <div ref={parentRef} className="w-full" style={{ contain: 'none' }}>
       <div
         style={{
           height: `${rowVirtualizer.getTotalSize()}px`,
@@ -161,10 +177,8 @@ export default function VirtualizedVideoList({
           position: 'relative',
         }}
       >
-        {rowVirtualizer.getVirtualItems().map((virtualRow) => {
-          // scrollMargin を考慮して位置を調整
-          const transformY = virtualRow.start - rowVirtualizer.options.scrollMargin;
-          // この行に表示する動画のインデックス範囲を計算
+        {virtualItems.map((virtualRow) => {
+          const transformY = virtualRow.start - scrollMargin;
           const startIndex = virtualRow.index * columns;
           const rowVideos = videos.slice(startIndex, startIndex + columns);
 
@@ -190,34 +204,22 @@ export default function VirtualizedVideoList({
               }}
             >
               {rowVideos.map((video) => (
-                <div key={video.id}>
+                <div key={`${video.id}-${virtualRow.index}`}>
                   <MovieCard
                     video={{
                       id: video.id,
                       title: video.title,
-                      channelName:
-                        oshis.find((o) => o.id === video.channel_id)?.name_jp ||
-                        'Unknown',
+                      channelName: oshis.find((o) => o.id === video.channel_id)?.name_jp || 'Unknown',
                     }}
                     isWatched={logs[video.id]?.is_watched || false}
                     comment={logs[video.id]?.comment || ''}
                     isFavorite={logs[video.id]?.is_favorite || false}
-                    videoTags={
-                      userTags.filter((t) =>
-                        (videoTagsMap[video.id] || []).includes(t.id)
-                      )
-                    }
+                    videoTags={userTags.filter((t) => (videoTagsMap[video.id] || []).includes(t.id))}
                     userTags={userTags}
-                    onWatchChange={(isWatched) =>
-                      onWatchChange(video.id, isWatched)
-                    }
+                    onWatchChange={(isWatched) => onWatchChange(video.id, isWatched)}
                     onCommentSave={(comment) => onCommentSave(video.id, comment)}
-                    onTagsSave={(selectedIds, newNames) =>
-                      onTagsSave(video.id, selectedIds, newNames)
-                    }
-                    onFavoriteToggle={(isFav) =>
-                      onFavoriteToggle(video.id, isFav)
-                    }
+                    onFavoriteToggle={(isFav) => onFavoriteToggle(video.id, isFav)}
+                    onTagsSave={(selectedIds, newNames) => onTagsSave(video.id, selectedIds, newNames)}
                     glowColor={glowColor}
                   />
                 </div>
@@ -226,11 +228,22 @@ export default function VirtualizedVideoList({
           );
         })}
       </div>
-      {videos.length === 0 && (
-        <div className="flex h-full items-center justify-center py-20 text-indigo-200/50">
-          条件に一致する動画が見つかりませんでした。
-        </div>
-      )}
+
+      {/* 読み込み状態の表示 */}
+      <div className="flex h-20 items-center justify-center py-10">
+        {isLoading && (
+          <div className="flex items-center gap-3 text-indigo-200/80 animate-pulse">
+            <div className="h-2 w-2 rounded-full bg-indigo-500"></div>
+            <span className="text-sm font-medium tracking-widest uppercase">読み込み中...</span>
+          </div>
+        )}
+        {!hasMore && videos.length > 0 && (
+          <span className="text-xs uppercase tracking-widest text-white/20">すべての動画を読み込みました</span>
+        )}
+        {videos.length === 0 && !isLoading && (
+          <div className="text-indigo-200/50">動画が見つかりませんでした。</div>
+        )}
+      </div>
     </div>
   );
 }
