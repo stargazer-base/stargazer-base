@@ -108,14 +108,49 @@ export function useVideoTags(
           const results = await Promise.all(ops);
           const hasError = results.some((res) => res.error);
           if (hasError) {
-             console.error('Failed to update video tags', results);
-             alert('動画のタグ更新に失敗しました。');
-             return false;
+            console.error('Failed to update video tags', results);
+            alert('動画のタグ更新に失敗しました。');
+            return false;
+          }
+
+          // Cleanup unused tags (Physical delete)
+          if (tagsToRemove.length > 0) {
+            // Check remaining usage in video_tags for this user
+            const { data: stillUsedData, error: stillUsedError } =
+              await supabase
+                .from('video_tags')
+                .select('tag_id')
+                .in('tag_id', tagsToRemove)
+                .eq('user_id', userId);
+
+            if (!stillUsedError) {
+              const stillUsedTagIds = new Set(
+                (stillUsedData || []).map((row) => row.tag_id)
+              );
+              const tagsToPhysicallyDelete = tagsToRemove.filter(
+                (tagId) => !stillUsedTagIds.has(tagId)
+              );
+
+              if (tagsToPhysicallyDelete.length > 0) {
+                const { error: finalDeleteError } = await supabase
+                  .from('tags')
+                  .delete()
+                  .in('id', tagsToPhysicallyDelete)
+                  .eq('user_id', userId);
+
+                if (!finalDeleteError) {
+                  // Reflect in search filter by updating userTags state
+                  setUserTags((prev) =>
+                    prev.filter((t) => !tagsToPhysicallyDelete.includes(t.id))
+                  );
+                }
+              }
+            }
           }
         } catch (error) {
-           console.error('Failed to update video tags:', error);
-           alert('動画のタグ更新に失敗しました。');
-           return false;
+          console.error('Failed to update video tags:', error);
+          alert('動画のタグ更新に失敗しました。');
+          return false;
         }
       }
 
